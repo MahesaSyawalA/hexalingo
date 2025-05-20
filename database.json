@@ -21,6 +21,10 @@
       "matakuliah":[1,2,3]
     }
     ],
+    "session":[
+        "user_id":1,
+        "nama": "Mahesa Syawal"
+    ],
     "tugas":[
         {
             "id_matakuliah":1,
