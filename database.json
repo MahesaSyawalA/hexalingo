@@ -1,0 +1,220 @@
+{
+    "matakuliah": [
+        { "id": 1, "nama": "Matematika Diskrit" },
+        { "id": 2, "nama": "Desain Berpikir" },
+        { "id": 3, "nama": "Landasan Pendidikan" },
+        { "id": 4, "nama": "Pendidikan Kewarga Negaraan" },
+        { "id": 5, "nama": "Struktur Data dan Algoritma" },
+        { "id": 6, "nama": "Rekayasa Kebutuhan Perangkat Lunak" }
+    ],
+    "users":[
+    {
+      "id": 1,
+      "name": "Mahesa Syawal",
+      "email": "mahesa@example.com",
+      "matakuliah":[1,2,3,4,5]
+    },
+    {
+      "id": 2,
+      "name": "Rina Oktavia",
+      "email": "rina@example.com",
+      "matakuliah":[1,2,3]
+    }
+    ],
+    "tugas":[
+        {
+            "id_matakuliah":1,
+            "tengat_waktu":"01-07-2025",
+            "title":"Tugas Pertemuan 12",
+            "soal":[
+                {
+                    "id_soal": 1,
+                    "pertanyaan": "Apa yang dimaksud dengan graf dalam matematika diskrit?",
+                    "tipe": "essay",
+                    "bobot_nilai": 20
+                },
+                {
+                    "id_soal": 2,
+                    "pertanyaan": "Sebutkan dan jelaskan 3 jenis graf sederhana!",
+                    "tipe": "essay",
+                    "bobot_nilai": 30
+                },
+                {
+                    "id_soal": 3,
+                    "pertanyaan": "Hitunglah banyaknya sisi pada graf lengkap dengan 8 simpul (K₈)!",
+                    "tipe": "essay",
+                    "bobot_nilai": 25
+                },
+                {
+                    "id_soal": 4,
+                    "pertanyaan": "Manakah dari berikut ini yang BUKAN merupakan sifat pohon?",
+                    "tipe": "pilihan_ganda",
+                    "pilihan": [
+                        {"option": "A", "text": "Graf terhubung"},
+                        {"option": "B", "text": "Tidak memiliki sirkuit"},
+                        {"option": "C", "text": "Memiliki n-1 sisi untuk n simpul"},
+                        {"option": "D", "text": "Memiliki derajat simpul minimal 2"}
+                    ],
+                    "jawaban_benar": "D",
+                    "bobot_nilai": 25
+                },
+                {
+                    "id_soal": 5,
+                    "pertanyaan": "Manakah yang termasuk contoh graf bipartit?",
+                    "tipe": "pilihan_ganda",
+                    "pilihan": [
+                        {"option": "A", "text": "Graf bintang"},
+                        {"option": "B", "text": "Graf lingkaran dengan simpul ganjil"},
+                        {"option": "C", "text": "Graf lengkap K₅"},
+                        {"option": "D", "text": "Semua jawaban salah"}
+                    ],
+                    "jawaban_benar": "A",
+                    "bobot_nilai": 15
+                },
+                {
+                    "id_soal": 6,
+                    "pertanyaan": "Jika suatu graf memiliki 6 sisi dan semua simpul berderajat 2, maka graf tersebut adalah:",
+                    "tipe": "pilihan_ganda",
+                    "pilihan": [
+                        {"option": "A", "text": "Graf lingkaran"},
+                        {"option": "B", "text": "Graf bintang"},
+                        {"option": "C", "text": "Graf lengkap"},
+                        {"option": "D", "text": "Graf bipartit"}
+                    ],
+                    "jawaban_benar": "A",
+                    "bobot_nilai": 20
+                },
+                {
+                    "id_soal": 7,
+                    "pertanyaan": "Manakah pernyataan yang BENAR tentang graf Euler?",
+                    "tipe": "pilihan_ganda",
+                    "pilihan": [
+                        {"option": "A", "text": "Semua simpul berderajat genap"},
+                        {"option": "B", "text": "Memiliki tepat dua simpul berderajat ganjil"},
+                        {"option": "C", "text": "Dapat dibuat sirkuit Euler"},
+                        {"option": "D", "text": "Semua jawaban benar"}
+                    ],
+                    "jawaban_benar": "D",
+                    "bobot_nilai": 20
+                },
+                {
+                    "id_soal": 8,
+                    "pertanyaan": "Kompleksitas waktu algoritma BFS pada graf dengan n simpul dan m sisi adalah:",
+                    "tipe": "pilihan_ganda",
+                    "pilihan": [
+                        {"option": "A", "text": "O(n)"},
+                        {"option": "B", "text": "O(m)"},
+                        {"option": "C", "text": "O(n+m)"},
+                        {"option": "D", "text": "O(n log n)"}
+                    ],
+                    "jawaban_benar": "C",
+                    "bobot_nilai": 20
+                }
+            ]
+        }
+    ]
+    "jawaban": [
+        {
+            "id_user": 1,
+            "id_tugas": 1,
+            "jawaban_user": [
+                {
+                    "id_soal": 1,
+                    "jawaban": "Graf dalam matematika diskrit adalah struktur diskrit yang terdiri dari himpunan simpul (vertex) yang terhubung oleh sisi (edge) yang merepresentasikan hubungan antara simpul-simpul tersebut."
+                },
+                {
+                    "id_soal": 2,
+                    "jawaban": "1. Graf sederhana: graf tanpa loop atau sisi ganda\n2. Graf lengkap: graf sederhana dimana setiap pasang simpul berbeda terhubung oleh sisi\n3. Graf bipartit: graf yang simpulnya dapat dibagi menjadi dua himpunan disjoint"
+                },
+                {
+                    "id_soal": 3,
+                    "jawaban": "28 sisi"
+                },
+                {
+                    "id_soal": 4,
+                    "jawaban": "D"
+                },
+                {
+                    "id_soal": 5,
+                    "jawaban": "A"
+                },
+                {
+                    "id_soal": 6,
+                    "jawaban": "A"
+                },
+                {
+                    "id_soal": 7,
+                    "jawaban": "D"
+                },
+                {
+                    "id_soal": 8,
+                    "jawaban": "C"
+                }
+            ],
+            "nilai": {
+                "total_nilai": 175,
+                "detail_nilai": [
+                    {"id_soal": 1, "nilai": 20},
+                    {"id_soal": 2, "nilai": 30},
+                    {"id_soal": 3, "nilai": 25},
+                    {"id_soal": 4, "nilai": 25},
+                    {"id_soal": 5, "nilai": 15},
+                    {"id_soal": 6, "nilai": 20},
+                    {"id_soal": 7, "nilai": 20},
+                    {"id_soal": 8, "nilai": 20}
+                ]
+            }
+        },
+        {
+            "id_user": 2,
+            "id_tugas": 1,
+            "jawaban_user": [
+                {
+                    "id_soal": 1,
+                    "jawaban": "Graf adalah kumpulan titik yang dihubungkan oleh garis."
+                },
+                {
+                    "id_soal": 2,
+                    "jawaban": "1. Graf sederhana\n2. Graf berarah\n3. Graf berbobot"
+                },
+                {
+                    "id_soal": 3,
+                    "jawaban": "24 sisi"
+                },
+                {
+                    "id_soal": 4,
+                    "jawaban": "C"
+                },
+                {
+                    "id_soal": 5,
+                    "jawaban": "B"
+                },
+                {
+                    "id_soal": 6,
+                    "jawaban": "A"
+                },
+                {
+                    "id_soal": 7,
+                    "jawaban": "A"
+                },
+                {
+                    "id_soal": 8,
+                    "jawaban": "B"
+                }
+            ],
+            "nilai": {
+                "total_nilai": 110,
+                "detail_nilai": [
+                    {"id_soal": 1, "nilai": 15},
+                    {"id_soal": 2, "nilai": 15},
+                    {"id_soal": 3, "nilai": 0},
+                    {"id_soal": 4, "nilai": 0},
+                    {"id_soal": 5, "nilai": 0},
+                    {"id_soal": 6, "nilai": 20},
+                    {"id_soal": 7, "nilai": 20},
+                    {"id_soal": 8, "nilai": 20}
+                ]
+            }
+        }
+    ]
+}
