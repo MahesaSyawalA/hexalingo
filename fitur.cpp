@@ -3,7 +3,10 @@
 #include <vector>
 #include <cctype>
 #include <cstdlib>
+#include <fstream>
+#include "json.hpp"
 
+using json = nlohmann::json;
 using namespace std;
 
 struct Materi {
@@ -11,10 +14,10 @@ struct Materi {
     vector<Materi> subMateri;
 };
 
-// Menyimpan semua Mata Pelajaran sebagai root nodes
+// Data utama, simpan semua Mata Pelajaran (root nodes)
 vector<Materi> rootMateriList;
 
-// Membersihkan layar
+// -------- Fungsi Utility untuk sistem --------
 void clearScreen() {
 #ifdef _WIN32
     system("cls");
@@ -23,7 +26,6 @@ void clearScreen() {
 #endif
 }
 
-// Input validasi 'y' atau 'n'
 char inputYaTidak(const string& prompt) {
     string line;
     while (true) {
@@ -41,7 +43,104 @@ char inputYaTidak(const string& prompt) {
     }
 }
 
-// Fungsi rekursif untuk menambah materi/submateri
+// -------- Fungsi Konversi Materi <-> JSON --------
+
+// Materi ke json secara rekursif
+json materiToJson(const Materi& materi, int level = 0) {
+    json j;
+    if(level == 0) {
+        // Root Materi (Mata Pelajaran)
+        j["judul"] = materi.judul;
+        j["materi"] = json::array();
+        for (const auto& sub : materi.subMateri) {
+            j["materi"].push_back(materiToJson(sub, level + 1));
+        }
+    } else if(level == 1) {
+        // Materi level 1
+        j["judul"] = materi.judul;
+        j["submateri"] = json::array();
+        for (const auto& sub : materi.subMateri) {
+            j["submateri"].push_back(materiToJson(sub, level + 1));
+        }
+    } else {
+        // Level 2+ submateri tanpa kunci lebih dalam
+        j["judul"] = materi.judul;
+        // Bisa diteruskan jika struktur lebih dalem, saat ini kosong
+    }
+    return j;
+}
+
+// JSON ke Materi secara rekursif
+Materi jsonToMateri(const json& j, int level = 0) {
+    Materi m;
+    if(level == 0) {
+        m.judul = j.value("judul", "");
+        if (j.contains("materi") && j["materi"].is_array()) {
+            for (const auto& sub : j["materi"]) {
+                m.subMateri.push_back(jsonToMateri(sub, level + 1));
+            }
+        }
+    } else if(level == 1) {
+        m.judul = j.value("judul", "");
+        if (j.contains("submateri") && j["submateri"].is_array()) {
+            for (const auto& sub : j["submateri"]) {
+                m.subMateri.push_back(jsonToMateri(sub, level + 1));
+            }
+        }
+    } else {
+        m.judul = j.value("judul", "");
+        // Jika ada subsubmateri bisa diteruskan di sini
+    }
+    return m;
+}
+
+// -------- Fungsi Load/Save dari file --------
+
+const string DATABASE_FILENAME = "database.json";
+
+void saveToJsonFile() {
+    json j;
+    j["daftar_mata_pelajaran"] = json::array();
+    for (const auto& mp : rootMateriList) {
+        j["daftar_mata_pelajaran"].push_back(materiToJson(mp));
+    }
+    try {
+        ofstream file(DATABASE_FILENAME);
+        if (!file) {
+            cerr << "Gagal membuka file untuk penulisan: " << DATABASE_FILENAME << endl;
+            return;
+        }
+        file << j.dump(4) << endl; // Indentasi 4 spasi
+        file.close();
+    } catch (const exception& e) {
+        cerr << "Kesalahan saat menyimpan file JSON: " << e.what() << endl;
+    }
+}
+
+void loadFromJsonFile() {
+    ifstream file(DATABASE_FILENAME);
+    if (!file) {
+        // File mungkin belum ada, ignore dan start fresh
+        return;
+    }
+    try {
+        json j;
+        file >> j;
+        file.close();
+        if (j.contains("daftar_mata_pelajaran") && j["daftar_mata_pelajaran"].is_array()) {
+            rootMateriList.clear();
+            for (const auto& mpJson : j["daftar_mata_pelajaran"]) {
+                rootMateriList.push_back(jsonToMateri(mpJson));
+            }
+        }
+    } catch (const exception& e) {
+        cerr << "Kesalahan saat membaca file JSON: " << e.what() << endl;
+        rootMateriList.clear();
+    }
+}
+
+// -------- Fungsi Input Materi/Submateri --------
+
 void tambahMateri(Materi& materi, int level = 1) {
     string indent(level * 2, ' ');
     cout << indent << "Masukkan Judul Materi (Level " << level << "): ";
@@ -62,7 +161,6 @@ void tambahMateri(Materi& materi, int level = 1) {
     }
 }
 
-// Fungsi menambah Materi baru yang adalah Mata Pelajaran (level 0)
 void tambahMateriKeRoot() {
     Materi mataPelajaranBaru;
     clearScreen();
@@ -73,7 +171,6 @@ void tambahMateriKeRoot() {
         cout << "Judul tidak boleh kosong, harap masukkan ulang: ";
         getline(cin, mataPelajaranBaru.judul);
     }
-    // Tambahkan submateri secara rekursif mulai level 1
     while (true) {
         char jawaban = inputYaTidak("Apakah Anda ingin menambahkan materi di bawah \"" + mataPelajaranBaru.judul + "\"?");
         if (jawaban == 'y') {
@@ -85,13 +182,17 @@ void tambahMateriKeRoot() {
         }
     }
     rootMateriList.push_back(mataPelajaranBaru);
+
+    saveToJsonFile(); // simpan setiap tambah
+
     cout << "\nMateri berhasil ditambahkan.\n";
     cout << "Tekan Enter untuk melanjutkan...";
     string dummy;
     getline(cin, dummy);
 }
 
-// Fungsi tampilkan dengan format tree modern
+// -------- Fungsi Tampil Data --------
+
 void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string& prefix = "") {
     string indentUnit = "    ";
     string batangVertikal = "|";
@@ -109,7 +210,6 @@ void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string
         label = "[Submateri] ";
         cout << prefix << batangVertikal << batangSubCabang << " " << label << materi.judul << endl;
     } else {
-        // Level lebih dalam bisa pakai indent biasa
         label = "";
         cout << prefix << indentUnit << label << materi.judul << endl;
     }
@@ -134,15 +234,14 @@ void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string
     }
 }
 
-// Tampilkan Semua Materi (menampilkan semua Mata Pelajaran)
 void tampilkanSemuaMateri() {
     clearScreen();
     cout << "=== Daftar Semua Mata Pelajaran ===\n";
     if (rootMateriList.empty()) {
         cout << "Belum ada materi yang dimasukkan.\n";
     } else {
-        for (size_t i = 0; i < rootMateriList.size(); ++i) {
-            tampilkanMateriFormatBaru(rootMateriList[i]);
+        for (const auto& materi : rootMateriList) {
+            tampilkanMateriFormatBaru(materi);
             cout << "\n";
         }
     }
@@ -152,7 +251,8 @@ void tampilkanSemuaMateri() {
     getline(cin, dummy);
 }
 
-// Fungsi rekursif edit materi tiap level
+// -------- Fungsi Edit Materi --------
+
 bool editMateriRekursif(Materi& materi, const string& judulLama) {
     if (materi.judul == judulLama) {
         cout << "Judul sekarang: " << materi.judul << endl;
@@ -161,6 +261,7 @@ bool editMateriRekursif(Materi& materi, const string& judulLama) {
         getline(cin, newJudul);
         if (!newJudul.empty()) {
             materi.judul = newJudul;
+            saveToJsonFile(); // simpan saat edit
             cout << "Judul berhasil diubah.\n";
         } else {
             cout << "Edit dibatalkan.\n";
@@ -175,11 +276,13 @@ bool editMateriRekursif(Materi& materi, const string& judulLama) {
     return false;
 }
 
-// Fungsi hapus materi rekursif
+// -------- Fungsi Hapus Materi --------
+
 bool hapusMateriRekursif(Materi& parent, const string& judul) {
     for (size_t i = 0; i < parent.subMateri.size(); i++) {
         if (parent.subMateri[i].judul == judul) {
             parent.subMateri.erase(parent.subMateri.begin() + i);
+            saveToJsonFile(); // simpan saat hapus
             cout << "Materi \"" << judul << "\" berhasil dihapus.\n";
             return true;
         }
@@ -194,6 +297,7 @@ bool hapusMateriRootList(const string& judul) {
     for (size_t i = 0; i < rootMateriList.size(); i++) {
         if (rootMateriList[i].judul == judul) {
             rootMateriList.erase(rootMateriList.begin() + i);
+            saveToJsonFile(); // simpan saat hapus
             cout << "Materi root \"" << judul << "\" berhasil dihapus.\n";
             return true;
         }
@@ -201,7 +305,8 @@ bool hapusMateriRootList(const string& judul) {
     return false;
 }
 
-// Menu Admin
+// -------- Menu Admin dan User --------
+
 void adminMenu() {
     char pilihan;
     do {
@@ -250,11 +355,9 @@ void adminMenu() {
                 string judul;
                 getline(cin, judul);
                 bool deleted = false;
-                // Cek hapus di root list dulu
                 if (hapusMateriRootList(judul)) {
                     deleted = true;
                 } else {
-                    // Hapus rekursif dari semua subtree
                     for (auto& materi : rootMateriList) {
                         if (hapusMateriRekursif(materi, judul)) {
                             deleted = true;
@@ -280,7 +383,6 @@ void adminMenu() {
     } while (pilihan != '5');
 }
 
-// Menu User
 void userMenu() {
     clearScreen();
     cout << "\n=== Menu User ===\n";
