@@ -15,7 +15,7 @@ struct Node {
 
 Node* head = nullptr;
 
-void tambahUser(string username, string namaLengkap, string email) {
+void tambahUserBaru(string username, string namaLengkap, string email) {
     // cek duplikat
     Node* current = head;
     while (current != nullptr) {
