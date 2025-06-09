@@ -1,16 +1,21 @@
+#include <iostream>
+#include <limits>  // Tambahkan header ini
+#include <cstdlib>  // untuk system
 #include "fitur.cpp"
 
 int main() {
-    Materi rootMateri; // Root materi untuk admin
     char pilihan;
 
     do {
-        cout << "=== Menu Utama ===" << endl;
-        cout << "1. Masuk sebagai Admin" << endl;
-        cout << "2. Masuk sebagai User" << endl;
-        cout << "3. Keluar" << endl;
-        cout << "Pilih: ";
-        cin >> pilihan;
+        clearScreen();  // Clear screen before main menu print
+
+        std::cout << "=== Menu Utama ===" << std::endl;
+        std::cout << "1. Masuk sebagai Admin" << std::endl;
+        std::cout << "2. Masuk sebagai User" << std::endl;
+        std::cout << "3. Keluar" << std::endl;
+        std::cout << "Pilih: ";
+        std::cin >> pilihan;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Perbaiki baris ini
 
         switch (pilihan) {
             case '1':
@@ -20,10 +25,12 @@ int main() {
                 userMenu(); // Menu untuk user
                 break;
             case '3':
-                cout << "Terima kasih! Selamat belajar." << endl;
+                std::cout << "Terima kasih! Selamat belajar." << std::endl;
                 break;
             default:
-                cout << "Pilihan tidak valid!" << endl;
+                std::cout << "Pilihan tidak valid!" << std::endl;
+                std::cout << "Tekan Enter untuk melanjutkan...";
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     } while (pilihan != '3');
 

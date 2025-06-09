@@ -1,30 +1,30 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <cctype> // untuk fungsi tolower
-#include <cstdlib> // untuk fungsi system
+#include <cctype>
+#include <cstdlib>
 
 using namespace std;
 
 struct Materi {
     string judul;
-    vector<Materi> subMateri; // Menyimpan sub-materi
+    vector<Materi> subMateri;
 };
 
-// Global root materi yang dapat diakses oleh admin dan user
-Materi rootMateri;
+// Menyimpan semua Mata Pelajaran sebagai root nodes
+vector<Materi> rootMateriList;
 
-// Fungsi untuk membersihkan layar
+// Membersihkan layar
 void clearScreen() {
 #ifdef _WIN32
-    system("cls"); // Untuk Windows
+    system("cls");
 #else
-    system("clear"); // Untuk Linux/Mac
+    system("clear");
 #endif
 }
 
-// Fungsi untuk membaca input 'y' atau 'n' dengan validasi
-char inputYaTidak(const string &prompt) {
+// Input validasi 'y' atau 'n'
+char inputYaTidak(const string& prompt) {
     string line;
     while (true) {
         cout << prompt << " (y/n): ";
@@ -41,12 +41,9 @@ char inputYaTidak(const string &prompt) {
     }
 }
 
-// Fungsi untuk menambahkan materi dengan input yang jelas
-void tambahMateri(Materi &materi, int level = 0) {
-    if (level == 0) {
-        clearScreen(); // Hanya sekali di level 0
-    }
-    string indent(level * 2, ' '); // spasi indentasi sesuai level
+// Fungsi rekursif untuk menambah materi/submateri
+void tambahMateri(Materi& materi, int level = 1) {
+    string indent(level * 2, ' ');
     cout << indent << "Masukkan Judul Materi (Level " << level << "): ";
     getline(cin, materi.judul);
     while (materi.judul.empty()) {
@@ -57,43 +54,106 @@ void tambahMateri(Materi &materi, int level = 0) {
         char jawaban = inputYaTidak(indent + "Apakah Anda ingin menambahkan sub-materi untuk \"" + materi.judul + "\"?");
         if (jawaban == 'y') {
             Materi sub;
-            tambahMateri(sub, level + 1); // rekursif tanpa clear screen lagi
+            tambahMateri(sub, level + 1);
             materi.subMateri.push_back(sub);
         } else {
-            break; // keluar dari loop jika tidak mau menambahkan sub materi
+            break;
         }
     }
 }
 
-// Fungsi untuk menampilkan materi
-void tampilkanMateri(const Materi &materi, int level = 0) {
-    for (int i = 0; i < level; i++) {
-        cout << "  "; // Indentasi untuk level
-    }
-    cout << "- " << materi.judul << endl;
-
-    for (const auto &sub : materi.subMateri) {
-        tampilkanMateri(sub, level + 1); // Rekursif untuk menampilkan sub-materi
-    }
-}
-
-// Fungsi untuk menampilkan materi lengkap sebelum edit/hapus
-void tampilkanMateriUntukAdmin(const Materi &materi) {
+// Fungsi menambah Materi baru yang adalah Mata Pelajaran (level 0)
+void tambahMateriKeRoot() {
+    Materi mataPelajaranBaru;
     clearScreen();
-    cout << "=== Daftar Materi Saat Ini ===" << endl;
-    if (materi.judul.empty()) {
-        cout << "Belum ada materi yang dimasukkan." << endl;
-    } else {
-        tampilkanMateri(materi);
+    cout << "=== Input Materi Baru ===" << endl;
+    cout << "Masukkan Judul Mata Pelajaran (Level 0): ";
+    getline(cin, mataPelajaranBaru.judul);
+    while (mataPelajaranBaru.judul.empty()) {
+        cout << "Judul tidak boleh kosong, harap masukkan ulang: ";
+        getline(cin, mataPelajaranBaru.judul);
     }
+    // Tambahkan submateri secara rekursif mulai level 1
+    while (true) {
+        char jawaban = inputYaTidak("Apakah Anda ingin menambahkan materi di bawah \"" + mataPelajaranBaru.judul + "\"?");
+        if (jawaban == 'y') {
+            Materi sub;
+            tambahMateri(sub, 1);
+            mataPelajaranBaru.subMateri.push_back(sub);
+        } else {
+            break;
+        }
+    }
+    rootMateriList.push_back(mataPelajaranBaru);
+    cout << "\nMateri berhasil ditambahkan.\n";
     cout << "Tekan Enter untuk melanjutkan...";
     string dummy;
     getline(cin, dummy);
 }
 
+// Fungsi tampilkan dengan format tree modern
+void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string& prefix = "") {
+    string indentUnit = "    ";
+    string batangVertikal = "|";
+    string batangCabang = "+--";
+    string batangSubCabang = "|--";
 
-// Fungsi untuk mengedit materi secara rekursif
-bool editMateriRekursif(Materi &materi, const string &judulLama) {
+    string label;
+    if (level == 0) {
+        label = "[Mata Pelajaran] ";
+        cout << label << materi.judul << endl;
+    } else if (level == 1) {
+        label = "[Materi] ";
+        cout << prefix << batangCabang << " " << label << materi.judul << endl;
+    } else if (level == 2) {
+        label = "[Submateri] ";
+        cout << prefix << batangVertikal << batangSubCabang << " " << label << materi.judul << endl;
+    } else {
+        // Level lebih dalam bisa pakai indent biasa
+        label = "";
+        cout << prefix << indentUnit << label << materi.judul << endl;
+    }
+
+    for (size_t i = 0; i < materi.subMateri.size(); ++i) {
+        const Materi& sub = materi.subMateri[i];
+        string newPrefix = prefix;
+        if (level == 0) {
+            if (i != materi.subMateri.size() - 1)
+                newPrefix = batangVertikal + indentUnit.substr(1);
+            else
+                newPrefix = indentUnit;
+        } else if (level == 1) {
+            if (i != materi.subMateri.size() - 1)
+                newPrefix = prefix + batangVertikal + indentUnit.substr(1);
+            else
+                newPrefix = prefix + indentUnit;
+        } else {
+            newPrefix = prefix + indentUnit;
+        }
+        tampilkanMateriFormatBaru(sub, level + 1, newPrefix);
+    }
+}
+
+// Tampilkan Semua Materi (menampilkan semua Mata Pelajaran)
+void tampilkanSemuaMateri() {
+    clearScreen();
+    cout << "=== Daftar Semua Mata Pelajaran ===\n";
+    if (rootMateriList.empty()) {
+        cout << "Belum ada materi yang dimasukkan.\n";
+    } else {
+        for (size_t i = 0; i < rootMateriList.size(); ++i) {
+            tampilkanMateriFormatBaru(rootMateriList[i]);
+            cout << "\n";
+        }
+    }
+    cout << "-----------------------------------\n";
+    cout << "Tekan Enter untuk melanjutkan...";
+    string dummy;
+    getline(cin, dummy);
+}
+
+// Fungsi rekursif edit materi tiap level
+bool editMateriRekursif(Materi& materi, const string& judulLama) {
     if (materi.judul == judulLama) {
         cout << "Judul sekarang: " << materi.judul << endl;
         cout << "Masukkan judul baru (kosongkan untuk batal): ";
@@ -107,7 +167,7 @@ bool editMateriRekursif(Materi &materi, const string &judulLama) {
         }
         return true;
     }
-    for (auto &sub : materi.subMateri) {
+    for (auto& sub : materi.subMateri) {
         if (editMateriRekursif(sub, judulLama)) {
             return true;
         }
@@ -115,8 +175,8 @@ bool editMateriRekursif(Materi &materi, const string &judulLama) {
     return false;
 }
 
-// Fungsi untuk menghapus materi secara rekursif
-bool hapusMateriRekursif(Materi &parent, const string &judul) {
+// Fungsi hapus materi rekursif
+bool hapusMateriRekursif(Materi& parent, const string& judul) {
     for (size_t i = 0; i < parent.subMateri.size(); i++) {
         if (parent.subMateri[i].judul == judul) {
             parent.subMateri.erase(parent.subMateri.begin() + i);
@@ -130,45 +190,54 @@ bool hapusMateriRekursif(Materi &parent, const string &judul) {
     return false;
 }
 
-// Fungsi untuk menu admin
+bool hapusMateriRootList(const string& judul) {
+    for (size_t i = 0; i < rootMateriList.size(); i++) {
+        if (rootMateriList[i].judul == judul) {
+            rootMateriList.erase(rootMateriList.begin() + i);
+            cout << "Materi root \"" << judul << "\" berhasil dihapus.\n";
+            return true;
+        }
+    }
+    return false;
+}
+
+// Menu Admin
 void adminMenu() {
     char pilihan;
     do {
         clearScreen();
-        cout << "\n=== Menu Admin ===" << endl;
-        cout << "1. Tambah Materi" << endl;
-        cout << "2. Tampilkan Materi" << endl;
-        cout << "3. Edit Materi" << endl;
-        cout << "4. Hapus Materi" << endl;
-        cout << "5. Keluar" << endl;
+        cout << "\n=== Menu Admin ===\n";
+        cout << "1. Tambah Materi\n";
+        cout << "2. Tampilkan Materi\n";
+        cout << "3. Edit Materi\n";
+        cout << "4. Hapus Materi\n";
+        cout << "5. Keluar\n";
         cout << "Pilih: ";
         string line;
         getline(cin, line);
-        if (line.empty()) {
-            cout << "Pilihan tidak boleh kosong, silakan coba lagi." << endl;
-            continue;
-        }
+        if (line.empty()) continue;
         pilihan = line[0];
+
         switch (pilihan) {
             case '1':
-                tambahMateri(rootMateri);
+                tambahMateriKeRoot();
                 break;
             case '2':
-                cout << "\nDaftar Materi:" << endl;
-                if (rootMateri.judul.empty()) {
-                    cout << "Belum ada materi yang dimasukkan." << endl;
-                } else {
-                    tampilkanMateri(rootMateri);
-                }
-                cout << "Tekan Enter untuk kembali...";
-                getline(cin, line);
+                tampilkanSemuaMateri();
                 break;
             case '3': {
-                tampilkanMateriUntukAdmin(rootMateri); // Menampilkan materi dulu sebelum edit
+                tampilkanSemuaMateri();
                 cout << "Masukkan judul materi yang ingin diedit: ";
                 string judulLama;
                 getline(cin, judulLama);
-                if (!editMateriRekursif(rootMateri, judulLama)) {
+                bool found = false;
+                for (auto& materi : rootMateriList) {
+                    if (editMateriRekursif(materi, judulLama)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
                     cout << "Materi tidak ditemukan.\n";
                 }
                 cout << "Tekan Enter untuk kembali...";
@@ -176,11 +245,24 @@ void adminMenu() {
                 break;
             }
             case '4': {
-                tampilkanMateriUntukAdmin(rootMateri); // Menampilkan materi dulu sebelum hapus
+                tampilkanSemuaMateri();
                 cout << "Masukkan judul materi yang ingin dihapus: ";
                 string judul;
                 getline(cin, judul);
-                if (!hapusMateriRekursif(rootMateri, judul)) {
+                bool deleted = false;
+                // Cek hapus di root list dulu
+                if (hapusMateriRootList(judul)) {
+                    deleted = true;
+                } else {
+                    // Hapus rekursif dari semua subtree
+                    for (auto& materi : rootMateriList) {
+                        if (hapusMateriRekursif(materi, judul)) {
+                            deleted = true;
+                            break;
+                        }
+                    }
+                }
+                if (!deleted) {
                     cout << "Materi tidak ditemukan.\n";
                 }
                 cout << "Tekan Enter untuk kembali...";
@@ -188,25 +270,32 @@ void adminMenu() {
                 break;
             }
             case '5':
-                cout << "Keluar dari menu admin." << endl;
+                cout << "Keluar dari menu admin.\n";
                 break;
             default:
-                cout << "Pilihan tidak valid! Silakan coba lagi." << endl;
+                cout << "Pilihan tidak valid! Silakan coba lagi.\n";
+                cout << "Tekan Enter untuk melanjutkan...";
+                getline(cin, line);
         }
     } while (pilihan != '5');
 }
 
-// Fungsi untuk menu user
+// Menu User
 void userMenu() {
     clearScreen();
-    cout << "\n=== Menu User ===" << endl;
-    if (rootMateri.judul.empty()) {
-        cout << "Belum ada materi untuk ditampilkan." << endl;
+    cout << "\n=== Menu User ===\n";
+    if (rootMateriList.empty()) {
+        cout << "Belum ada materi untuk ditampilkan.\n";
     } else {
-        cout << "Daftar Materi:" << endl;
-        tampilkanMateri(rootMateri);
+        cout << "Daftar Materi:\n";
+        for (const auto& materi : rootMateriList) {
+            tampilkanMateriFormatBaru(materi);
+            cout << "\n";
+        }
     }
     cout << "Tekan Enter untuk kembali...";
     string dummy;
     getline(cin, dummy);
 }
+
+
