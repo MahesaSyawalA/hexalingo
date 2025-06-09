@@ -77,3 +77,62 @@ void lihatProfil(string username) {
     }
     cout << "⚠️  User tidak ditemukan.\n";
 }
+
+void tampilkanMenu() {
+    cout << "\n=== MENU MANAJEMEN USER ===\n";
+    cout << "1. Tambah User\n";
+    cout << "2. Hapus User\n";
+    cout << "3. Lihat Profil User\n";
+    cout << "4. Keluar\n";
+    cout << "Pilih opsi (1-4): ";
+}
+
+
+// MAIN MENU Disini ya
+int main() {
+    int pilihan;
+    string username, namaLengkap, email;
+
+    do {
+        tampilkanMenu();
+        cin >> pilihan;
+        cin.ignore();
+
+        switch (pilihan) {
+            case 1:
+                cout << "\n== Tambah User ==\n";
+                cout << "Username     : ";
+                getline(cin, username);
+                cout << "Nama Lengkap : ";
+                getline(cin, namaLengkap);
+                cout << "Email        : ";
+                getline(cin, email);
+                tambahUserBaru(username, namaLengkap, email);
+                break;
+
+            case 2:
+                cout << "\n== Hapus User ==\n";
+                cout << "Masukkan username yang ingin dihapus: ";
+                getline(cin, username);
+                hapusUser(username);
+                break;
+
+            case 3:
+                cout << "\n== Lihat Profil ==\n";
+                cout << "Masukkan username yang ingin dilihat: ";
+                getline(cin, username);
+                lihatProfil(username);
+                break;
+
+            case 4:
+                cout << "👋 Keluar dari program. Sampai jumpa!\n";
+                break;
+
+            default:
+                cout << "❌ Pilihan tidak valid. Silakan pilih 1-4.\n";
+        }
+
+    } while (pilihan != 4);
+
+    return 0;
+}
