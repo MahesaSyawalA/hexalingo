@@ -64,15 +64,15 @@ void tambahMateri(Materi &materi, int level = 0) {
     }
 }
 
-// Fungsi untuk menampilkan materi
+
 void tampilkanMateri(const Materi &materi, int level = 0) {
     for (int i = 0; i < level; i++) {
-        cout << "  "; // Indentasi untuk level
+        cout << "  "; 
     }
     cout << "- " << materi.judul << endl;
 
     for (const auto &sub : materi.subMateri) {
-        tampilkanMateri(sub, level + 1); // Rekursif untuk menampilkan sub-materi
+        tampilkanMateri(sub, level + 1); \
     }
 }
 
@@ -114,9 +114,9 @@ void adminMenu() {
     } while (pilihan != '3');
 }
 
-// Fungsi untuk menu user
+
 void userMenu() {
-    clearScreen(); // Bersihkan layar sebelum menampilkan menu
+    clearScreen(); 
     cout << "\n=== Menu User ===" << endl;
     if (rootMateri.judul.empty()) {
         cout << "Belum ada materi untuk ditampilkan." << endl;
