@@ -203,6 +203,47 @@ void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string
     }
 }
 
+void searchMateri(const json& data, const string& keyword) {
+    bool ditemukan = false;
+    string keyword_lower = toLower(keyword);
+
+    cout << "Hasil pencarian materi untuk judul: \"" << keyword << "\"\n\n";
+
+    for (const auto& pelajaran : data["daftar_mata_pelajaran"]) {
+        string mapel_judul = pelajaran["judul"];
+        for (const auto& materi : pelajaran["materi"]) {
+            string materi_judul = materi["judul"];
+            string materi_judul_lower = toLower(materi_judul);
+
+            if (materi_judul_lower == keyword_lower) {
+                ditemukan = true;
+                cout << "Ditemukan di mata pelajaran: " << mapel_judul << endl;
+                cout << "Materi: " << materi_judul << endl;
+
+                if (materi.contains("submateri") && !materi["submateri"].empty()) {
+                    cout << "Submateri:\n";
+                    for (const auto& sub : materi["submateri"]) {
+                        cout << " - " << sub["judul"] << endl;
+                    }
+                } else {
+                    cout << "(Tidak ada submateri)\n";
+                }
+                cout << "----------------------\n";
+            }
+        }
+    }
+
+    if (!ditemukan) {
+        cout << "Materi dengan judul \"" << keyword << "\" tidak ditemukan.\n";
+        cout << "Tekan Enter...";
+        string dummy;
+        getline(cin, dummy);
+    }
+    cout << "Tekan Enter...";
+    string dummy;
+    getline(cin, dummy);
+}
+
 void tampilkanSemuaMateri() {
     loadFromJsonFile(DATABASE_FILENAME);
     clearScreen();
@@ -273,7 +314,8 @@ void adminMenu() {
              << "2. Tampilkan Materi\n"
              << "3. Edit Materi\n"
              << "4. Hapus Materi\n"
-             << "5. Keluar\nPilih: ";
+             << "5. Cari Materi\n"
+             << "6. Keluar\nPilih: ";
         string input;
         getline(cin, input);
         pilihan = input.empty() ? ' ' : input[0];
@@ -306,8 +348,25 @@ void adminMenu() {
                 cout << "Tekan Enter..."; getline(cin, input);
                 break;
             }
+            case '5': {
+                ifstream file("database.json");
+                if (!file.is_open()) {
+                    cout << "Failed to open file." << endl;
+                    break;
+                }
+
+                json data;
+                file >> data;
+
+                string keyword;
+                cout << "Masukkan judul materi yang ingin dicari: ";
+                getline(cin, keyword); // AMAN karena sudah cin.ignore()
+
+                searchMateri(data, keyword);
+                break;
+            }
         }
-    } while (pilihan != '5');
+    } while (pilihan != '6');
 }
 
 void userMenu() {
