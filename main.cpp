@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <stack>       // For history stack
 #include "auth/user.h"
 #include "auth/auth.h"
 #include "json.hpp"
@@ -12,14 +13,45 @@ using json = nlohmann::json;
 
 using namespace std;
 
+// ==== MULAI PENAMBAHAN FITUR HISTORI ====
+// Stack untuk menyimpan histori navigasi user
+stack<string> userHistory;
+
+// Fungsi menambah histori pada stack
+void tambahHistori(const string& item) {
+    userHistory.push(item);
+}
+
+// Fungsi menampilkan histori navigasi user
+void lihatHistori() {
+    if (userHistory.empty()) {
+        cout << "\n=== HISTORI KOSONG ===\n";
+        cout << "Belum ada aktivitas yang tercatat.\n";
+    } else {
+        cout << "\n=== HISTORI AKTIVITAS ===\n";
+        // Buat stack sementara untuk menampilkan histori dari yang terlama ke terbaru
+        stack<string> tempStack = userHistory;
+        // Gunakan vector untuk menyimpan karena stack aksesnya hanya top
+        vector<string> tempVec;
+        while (!tempStack.empty()) {
+            tempVec.push_back(tempStack.top());
+            tempStack.pop();
+        }
+        // Tampilkan dari yang paling awal (indeks 1)
+        for (int i = (int)tempVec.size() - 1; i >= 0; i--) {
+            cout << (tempVec.size() - i) << ". " << tempVec[i] << "\n";
+        }
+    }
+    cout << "=====================\n";
+    cout << "Tekan Enter untuk kembali...";
+    cin.ignore();
+    cin.get();
+}
+// ==== AKHIR PENAMBAHAN FITUR HISTORI ====
+
+
 void showMainMenu()
 {
-    // #ifdef _WIN32
-    // system("cls");
-    // #else
-    // system("clear");
-    // #endif
-
     cout << "\n========================================\n";
     cout << "              Hexalingo\n";
     cout << "========================================\n";
@@ -32,12 +64,6 @@ void showMainMenu()
 
 void showWelcomeMessage(User* user)
 {
-    // #ifdef _WIN32
-    // system("cls");
-    // #else
-    // system("clear");
-    // #endif
-
     cout << "\n========================================\n";
     cout << "          Selamat Datang!\n";
     cout << "========================================\n";
@@ -54,30 +80,26 @@ int main()
     Auth auth;
     int choice;
 
-    // Try to load session at program start
     cout << "Memuat sistem...\n";
     if (auth.loadSession())
     {
         cout << "Session ditemukan! Auto-login berhasil.\n";
-        // Directly proceed to the logged-in state in the loop below
-        // No need for a separate showWelcomeMessage here, it will be called in the loop
     }
     else
     {
         cout << "Tidak ada session aktif. Silakan login.\n";
     }
 
-    while (true) // Main application loop
+    while (true)
     {
-        if (auth.isLoggedIn()) // User is logged in
+        if (auth.isLoggedIn())
         {
             User* currentUser = auth.getCurrentUser();
-            showWelcomeMessage(currentUser); // Show welcome only once per login
+            showWelcomeMessage(currentUser);
 
             if (currentUser->getRole() == "admin")
             {
                 cout << "Anda Login Sebagai Admin"<<endl;
-                // After the menu returns, ask user what to do next
                 cout << "\n========================================\n";
                 cout << "Selamat data di Aplikasi Hexalingo\n";
                 cout << "1. Profil \n";
@@ -95,30 +117,32 @@ int main()
                 {
                     case 1:
                         mainProfile();
-                        break; 
+                        break;
                     case 2:
                         adminMenu();
                         break;
                     case 3:
                         auth.logout();
-                        return 0; // Exit the program
+                        return 0;
                     case 4:
-                        return 0; // Exit the program
+                        return 0;
                     default:
                         cout << "Pilihan tidak valid. Logout otomatis...\n";
                         auth.logout();
                         break;
                 }
             }
-            else
+            else // Role user
             {
                 cout << "Anda Login Sebagai User"<<endl;
                 cout << "\n========================================\n";
                 cout << "Selamat data di Aplikasi Hexalingo\n";
                 cout << "1. Profil \n";
                 cout << "2. Matakuliah & Materi Pembelajaran \n";
-                cout << "3. Logout\n";
-                cout << "4. Exit (session tetap aktif)\n";
+                // ==== TAMBAHAN MENU LIHAT HISTORI ====
+                cout << "3. Lihat Histori\n";
+                cout << "4. Logout\n";
+                cout << "5. Exit (session tetap aktif)\n";
                 cout << "========================================\n";
                 cout << "Pilihan: ";
 
@@ -129,29 +153,33 @@ int main()
                 switch (postMenuChoice)
                 {
                     case 1:
+                        tambahHistori("Melihat Profil");
                         mainProfile();
-                        break; 
+                        break;
                     case 2:
+                        tambahHistori("Melihat Matakuliah & Materi Pembelajaran");
                         userMenu();
                         break;
                     case 3:
-                        auth.logout();
-                        return 0; // Exit the program
+                        tambahHistori("Melihat Histori Aktivitas");
+                        lihatHistori();
+                        break;
                     case 4:
-                        return 0; // Exit the program
+                        auth.logout();
+                        return 0;
+                    case 5:
+                        return 0;
                     default:
                         cout << "Pilihan tidak valid. Logout otomatis...\n";
                         auth.logout();
                         break;
                 }
-                // userMenu(); // Call user menu
+                // userMenu();
             }
-
-            
         }
-        else // User is NOT logged in
+        else
         {
-            showMainMenu(); // Show Login/Register/Exit
+            showMainMenu();
             cin >> choice;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -159,21 +187,20 @@ int main()
             {
                 case 1:
                     auth.loginUser();
-                    // If login is successful, the next loop iteration will hit isLoggedIn() == true
                     break;
                 case 2:
                     auth.registerUser();
-                    // If registration is successful, it auto-logs in, so next loop will hit isLoggedIn() == true
                     break;
                 case 3:
                     cout << "Terima kasih telah menggunakan sistem kami!\n";
-                    return 0; // Exit the program
+                    return 0;
                 default:
                     cout << "Pilihan tidak valid!\n";
                     break;
             }
         }
-    } // End of while(true) loop
+    }
 
-    return 0; // Should ideally be unreachable
+    return 0;
 }
+

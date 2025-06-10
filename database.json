@@ -143,10 +143,10 @@
         }
     ],
     "session": {
-        "nama": "admin12",
-        "role": "admin",
-        "user_id": 3,
-        "username": "3"
+        "user_id": 1,
+        "nama": "Mahesa Syawal",
+        "role": "user",
+        "username": "mahesa"
     },
     "tugas": [
         {

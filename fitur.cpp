@@ -369,25 +369,13 @@ void adminMenu() {
     } while (pilihan != '6');
 }
 
+// ==== TAMBAHAN: EKSTERNAL fungsi tambahHistori() ====
+extern void tambahHistori(const string& item);
+
 void userMenu() {
     clearScreen();
     cout << "=== Menu User ===\n";
     tampilkanSemuaMateri();
-}
-
-int mainMateri() {
-    loadFromJsonFile(DATABASE_FILENAME);
-    char mode;
-    do {
-        clearScreen();
-        cout << "=== Menu Utama ===\n1. Admin\n2. User\n3. Keluar\nPilih: ";
-        string pilih;
-        getline(cin, pilih);
-        mode = pilih.empty() ? ' ' : pilih[0];
-
-        if (mode == '1') adminMenu();
-        else if (mode == '2') userMenu();
-    } while (mode != '3');
-
-    return 0;
+    // ==== TAMBAHAN: Tambah histori saat masuk menu ini ====
+    tambahHistori("Melihat Daftar Materi Pembelajaran");
 }

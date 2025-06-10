@@ -243,6 +243,8 @@ void tampilkanProfileMenu() {
     }
 }
 
+// ==== TAMBAHAN: EKSTERNAL fungsi tambahHistori() ====
+extern void tambahHistori(const string& item);
 
 int mainProfile() {
     const string jsonFile = "database.json";
@@ -253,6 +255,8 @@ int mainProfile() {
         lihatDetailProfile(currentSession.username);
         cout << "\nTekan enter untuk kembali...";
         cin.ignore();
+        // ==== TAMBAHAN: Tambah histori saat masuk menu ini (USER) ====
+        tambahHistori("Melihat Profil");
         return 0;
     }
 
@@ -308,6 +312,8 @@ int mainProfile() {
             default:
                 cout << "❌ Pilihan tidak valid. Silakan pilih 1-5.\n";
         }
+        // ==== TAMBAHAN: Tambah histori saat masuk menu ini (ADMIN) ====
+        tambahHistori("Mengelola Profil");
 
     } while (pilihan != 5 && isAdmin());
 
