@@ -71,6 +71,13 @@ Materi jsonToMateri(const json& j, int level = 0) {
     return m;
 }
 
+string toLower(const string& str) {
+    string result = str;
+    transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
+        return tolower(c);
+    });
+    return result;
+}
 // ---------- Load / Save ----------
 const string DATABASE_FILENAME = "database.json";
 
@@ -115,10 +122,12 @@ void loadFromJsonFile(const string& filePath) {
 void tambahMateri(Materi& materi, int level = 1) {
     string indent(level * 2, ' ');
     cout << indent << "Masukkan Judul Materi (Level " << level << "): ";
+    
     getline(cin, materi.judul);
     while (materi.judul.empty()) {
         cout << indent << "Judul tidak boleh kosong, ulangi: ";
         getline(cin, materi.judul);
+        materi.judul = toLower(materi.judul);
     }
 
     while (inputYaTidak(indent + "Tambah sub-materi \"" + materi.judul + "\"?") == 'y') {
@@ -126,6 +135,16 @@ void tambahMateri(Materi& materi, int level = 1) {
         tambahMateri(sub, level + 1);
         materi.subMateri.push_back(sub);
     }
+}
+
+bool isDuplicateTitle(const vector<Materi>& list, const string& judulBaru) {
+    string judulBaruLower = toLower(judulBaru);
+    for (const auto& m : list) {
+        if (toLower(m.judul) == judulBaruLower) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void tambahMateriKeRoot() {
@@ -137,8 +156,12 @@ void tambahMateriKeRoot() {
     cout << "Masukkan Judul: ";
     getline(cin, baru.judul);
 
-    while (baru.judul.empty()) {
-        cout << "Judul tidak boleh kosong, ulangi: ";
+    while (baru.judul.empty() || isDuplicateTitle(rootMateriList, baru.judul)) {
+        if (baru.judul.empty()) {
+            cout << "Judul tidak boleh kosong, ulangi: ";
+        } else {
+            cout << "Judul sudah ada, ulangi: ";
+        }
         getline(cin, baru.judul);
     }
 
@@ -174,6 +197,51 @@ void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string
         tampilkanMateriFormatBaru(materi.subMateri[i], level + 1, newPrefix);
     }
 }
+
+
+
+void searchMateri(const json& data, const string& keyword) {
+    bool ditemukan = false;
+    string keyword_lower = toLower(keyword);
+
+    cout << "Hasil pencarian materi untuk judul: \"" << keyword << "\"\n\n";
+
+    for (const auto& pelajaran : data["daftar_mata_pelajaran"]) {
+        string mapel_judul = pelajaran["judul"];
+        for (const auto& materi : pelajaran["materi"]) {
+            string materi_judul = materi["judul"];
+            string materi_judul_lower = toLower(materi_judul);
+
+            if (materi_judul_lower == keyword_lower) {
+                ditemukan = true;
+                cout << "Ditemukan di mata pelajaran: " << mapel_judul << endl;
+                cout << "Materi: " << materi_judul << endl;
+
+                if (materi.contains("submateri") && !materi["submateri"].empty()) {
+                    cout << "Submateri:\n";
+                    for (const auto& sub : materi["submateri"]) {
+                        cout << " - " << sub["judul"] << endl;
+                    }
+                } else {
+                    cout << "(Tidak ada submateri)\n";
+                }
+                cout << "----------------------\n";
+            }
+        }
+    }
+
+    if (!ditemukan) {
+        cout << "Materi dengan judul \"" << keyword << "\" tidak ditemukan.\n";
+        cout << "Tekan Enter...";
+        string dummy;
+        getline(cin, dummy);
+    }
+    cout << "Tekan Enter...";
+    string dummy;
+    getline(cin, dummy);
+}
+
+
 
 void tampilkanSemuaMateri() {
     loadFromJsonFile(DATABASE_FILENAME);
@@ -245,7 +313,8 @@ void adminMenu() {
              << "2. Tampilkan Materi\n"
              << "3. Edit Materi\n"
              << "4. Hapus Materi\n"
-             << "5. Keluar\nPilih: ";
+             << "5. Cari Materi\n"
+             << "6. Keluar\nPilih: ";
         string input;
         getline(cin, input);
         pilihan = input.empty() ? ' ' : input[0];
@@ -278,8 +347,25 @@ void adminMenu() {
                 cout << "Tekan Enter..."; getline(cin, input);
                 break;
             }
+            case '5': {
+                ifstream file("database.json");
+                if (!file.is_open()) {
+                    cout << "Failed to open file." << endl;
+                    break;
+                }
+
+                json data;
+                file >> data;
+
+                string keyword;
+                cout << "Masukkan judul materi yang ingin dicari: ";
+                getline(cin, keyword); // AMAN karena sudah cin.ignore()
+
+                searchMateri(data, keyword);
+                break;
+            }
         }
-    } while (pilihan != '5');
+    } while (pilihan != '6');
 }
 
 void userMenu() {

@@ -8,6 +8,32 @@
                     "submateri": []
                 }
             ]
+        },
+        {
+            "judul": "SDA",
+            "materi": [
+                {
+                    "judul": "Kombinasi",
+                    "submateri": [
+                        {
+                            "judul": "Cara Tree"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "judul": "Matdis",
+            "materi": [
+                {
+                    "judul": "Graf",
+                    "submateri": []
+                },
+                {
+                    "judul": "Tree",
+                    "submateri": []
+                }
+            ]
         }
     ],
     "jawaban": [
@@ -114,9 +140,10 @@
         }
     ],
     "session": {
-        "user_id": null,
-        "nama": null,
-        "role": null
+        "nama": "admin12",
+        "role": "admin",
+        "user_id": 3,
+        "username": "3"
     },
     "tugas": [
         {
