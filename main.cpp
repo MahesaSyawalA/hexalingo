@@ -3,33 +3,25 @@
 #include "auth/user.h"
 #include "auth/auth.h"
 
+// Tambahkan include fitur.cpp untuk akses adminMenu() dan userMenu()
+#include "fitur.cpp"
+
 using namespace std;
 
 void showMainMenu()
 {
-    system("cls"); // Gunakan "cls" jika di Windows, "clear" jika di Linux/Mac
+    #ifdef _WIN32
+    system("cls");
+    #else
+    system("clear");
+    #endif
+
     cout << "\n========================================\n";
     cout << "              Hexalingo\n";
     cout << "========================================\n";
     cout << "1. Login\n";
     cout << "2. Register\n";
     cout << "3. Exit\n";
-    cout << "========================================\n";
-    cout << "Pilihan: ";
-}
-
-void showUserMenu(User *user)
-{
-    system("cls"); // Gunakan "cls" jika di Windows, "clear" jika di Linux/Mac
-    cout << "\n========================================\n";
-    cout << "  MENU USER - " << user->getFullName() << "\n";
-    cout << "========================================\n";
-    cout << "1. View Profile\n";
-    cout << "2. Edit Profile\n";
-    cout << "3. Ganti Password\n";
-    cout << "4. Book Ticket\n";
-    cout << "5. View Routes\n";
-    cout << "6. Logout\n";
     cout << "========================================\n";
     cout << "Pilihan: ";
 }
@@ -45,6 +37,7 @@ int main()
         {
             showMainMenu();
             cin >> choice;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Hapus sisa input agar getline bisa bekerja nanti
 
             switch (choice)
             {
@@ -59,37 +52,25 @@ int main()
                 return 0;
             default:
                 cout << "Pilihan tidak valid!\n";
+                break;
             }
         }
         else
         {
-            User *currentUser = auth.getCurrentUser();
-            showUserMenu(currentUser);
-            cin >> choice;
+            // Setelah login berhasil, cek role user
+            User* currentUser = auth.getCurrentUser();
 
-            switch (choice)
+            if (currentUser->getRole() == "admin")
             {
-            case 1:
-                auth.viewProfile();
-                break;
-            case 2:
-                auth.editProfile();
-                break;
-            case 3:
-                auth.changePassword();
-                break;
-            case 4:
-                cout << "Fitur booking belum diimplementasi\n";
-                break;
-            case 5:
-                cout << "Fitur view routes belum diimplementasi\n";
-                break;
-            case 6:
-                auth.logout();
-                break;
-            default:
-                cout << "Pilihan tidak valid!\n";
+                adminMenu(); // Panggil menu admin dari fitur.cpp
             }
+            else
+            {
+                userMenu(); // Panggil menu user dari fitur.cpp
+            }
+
+            // Setelah keluar dari menu, logout user supaya bisa login ulang atau register baru
+            auth.logout();
         }
     }
 
