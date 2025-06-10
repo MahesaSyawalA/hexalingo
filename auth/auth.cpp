@@ -6,6 +6,9 @@
 #include <vector>
 #include <cctype>
 #include "auth.h"
+#include "../json.hpp"
+using json = nlohmann::json;
+
 
 // Platform-specific includes for password masking
 #ifdef _WIN32
@@ -120,124 +123,69 @@ string escapeJson(const string &str)
 }
 
 // Simple JSON parser for our specific format
-struct JsonUser
+// struct JsonUser
+// {
+//     int id;
+//     string username;
+//     string password;
+//     string name;
+//     string email;
+//     string phone;
+//     string role;
+// };
+
+vector<JsonUser> parseJsonUsers(const string &jsonStr)
 {
-    int id;
-    string username;
-    string password;
-    string name;
-    string email;
-    string phone;
-    string role;
-};
+    vector<JsonUser> result;
 
-vector<JsonUser> parseJsonUsers(const string &content)
-{
-    cout << "[DEBUG] JSON masuk ke parser:\n"
-         << content << endl;
-    vector<JsonUser> users;
-    size_t pos = content.find("\"users\"");
-    if (pos == string::npos)
-        return users;
-
-    pos = content.find('[', pos);
-    if (pos == string::npos)
-        return users;
-
-    size_t start = pos + 1;
-    size_t end = content.find(']', start);
-    if (end == string::npos)
-        return users;
-
-    string usersSection = content.substr(start, end - start);
-
-    // Parse each user object
-    size_t objStart = 0;
-    while ((objStart = usersSection.find('{', objStart)) != string::npos)
+    try
     {
-        size_t objEnd = usersSection.find('}', objStart);
-        if (objEnd == string::npos)
-            break;
+        json jsonData = json::parse(jsonStr);
 
-        string userObj = usersSection.substr(objStart + 1, objEnd - objStart - 1);
-        JsonUser user;
-
-        // Parse fields
-        size_t fieldPos = 0;
-        while (fieldPos < userObj.length())
+        // Pastikan bagian "users" ada dan berupa array
+        if (!jsonData.contains("users") || !jsonData["users"].is_array())
         {
-            size_t keyStart = userObj.find('"', fieldPos);
-            if (keyStart == string::npos)
-                break;
-
-            size_t keyEnd = userObj.find('"', keyStart + 1);
-            if (keyEnd == string::npos)
-                break;
-
-            string key = userObj.substr(keyStart + 1, keyEnd - keyStart - 1);
-
-            size_t colonPos = userObj.find(':', keyEnd);
-            if (colonPos == string::npos)
-                break;
-
-            size_t valueStart = userObj.find_first_not_of(" \t", colonPos + 1);
-            if (valueStart == string::npos)
-                break;
-
-            string value;
-            if (userObj[valueStart] == '"')
-            {
-                size_t valueEnd = userObj.find('"', valueStart + 1);
-                if (valueEnd == string::npos)
-                    break;
-                value = userObj.substr(valueStart + 1, valueEnd - valueStart - 1);
-                fieldPos = valueEnd + 1;
-            }
-            else
-            {
-                size_t valueEnd = userObj.find_first_of(",}", valueStart);
-                if (valueEnd == string::npos)
-                    valueEnd = userObj.length();
-                value = userObj.substr(valueStart, valueEnd - valueStart);
-                // Remove trailing whitespace
-                while (!value.empty() && isspace(value.back()))
-                {
-                    value.pop_back();
-                }
-                fieldPos = valueEnd;
-            }
-
-            // Assign values to user struct
-            if (key == "id")
-                user.id = stoi(value);
-            else if (key == "username")
-                user.username = value;
-            else if (key == "password")
-                user.password = value;
-            else if (key == "name")
-                user.name = value;
-            else if (key == "email")
-                user.email = value;
-            else if (key == "phone")
-                user.phone = value;
-            else if (key == "role")
-                user.role = value;
-            // Abaikan field lainnya seperti "matakuliah"
+            cout << "Data 'users' tidak ditemukan atau bukan array." << endl;
+            return result;
         }
 
-        users.push_back(user);
-        objStart = objEnd + 1;
+        for (auto &item : jsonData["users"])
+        {
+            JsonUser user;
+            user.id = item["id"];
+            user.username = item["username"];
+            user.password = item["password"];
+            user.name = item["name"];
+            user.email = item["email"];
+            user.phone = item["phone"];
+            user.role = item["role"];
+
+            // Kalau kamu punya field tambahan seperti id atau matakuliah:
+            // user.id = item["id"];
+            // user.matakuliah = item["matakuliah"].get<vector<int>>();
+
+            result.push_back(user);
+        }
+    }
+    catch (const std::exception &e)
+    {
+        cout << "Gagal parsing JSON: " << e.what() << endl;
     }
 
-    return users;
+    return result;
 }
 
-string generateJsonFromUsers(const vector<JsonUser> &users)
-{
-    string json = "{\n    \"users\": [\n";
-
-    for (size_t i = 0; i < users.size(); i++)
-    {
+string generateJsonFromUsers(const vector<JsonUser> &users) {
+    string json = "{\n";
+    json += "    \"matakuliah\": [\n";
+    // Tambahkan data matakuliah yang ada di file asli
+    json += "        { \"id\": 1, \"nama\": \"Matematika Diskrit\" },\n";
+    json += "        { \"id\": 2, \"nama\": \"Desain Berpikir\" },\n";
+    // ... tambahkan semua matakuliah
+    json += "    ],\n";
+    
+    json += "    \"users\": [\n";
+    for (size_t i = 0; i < users.size(); i++) {
         const JsonUser &user = users[i];
         json += "        {\n";
         json += "            \"id\": " + to_string(user.id) + ",\n";
@@ -246,21 +194,22 @@ string generateJsonFromUsers(const vector<JsonUser> &users)
         json += "            \"name\": \"" + escapeJson(user.name) + "\",\n";
         json += "            \"email\": \"" + escapeJson(user.email) + "\",\n";
         json += "            \"phone\": \"" + escapeJson(user.phone) + "\",\n";
-        json += "            \"role\": \"" + escapeJson(user.role) + "\"\n";
-        // json += "            \"matakuliah\": []\n";
+        json += "            \"role\": \"" + escapeJson(user.role) + "\",\n";
+        json += "            \"matakuliah\": []\n"; // Default empty array
         json += "        }";
-
-        if (i < users.size() - 1)
-        {
-            json += ",";
-        }
+        if (i < users.size() - 1) json += ",";
         json += "\n";
     }
-
-    json += "    ]\n}";
+    json += "    ],\n";
+    
+    // Tambahkan bagian tugas dan jawaban kosong
+    json += "    \"tugas\": [],\n";
+    json += "    \"jawaban\": [],\n";
+    json += "    \"session\": {}\n";
+    json += "}";
+    
     return json;
 }
-
 bool Auth::isLoggedIn()
 {
     return loggedIn;
@@ -269,6 +218,203 @@ bool Auth::isLoggedIn()
 User *Auth::getCurrentUser()
 {
     return &currentUser;
+}
+
+void Auth::updateSession(const JsonUser &user)
+{
+    // Baca database.json
+    ifstream inFile("database.json");
+    if (!inFile.is_open())
+    {
+        cout << "Gagal membuka database.json untuk update session\n";
+        return;
+    }
+
+    string content((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+    inFile.close();
+
+    // Cari posisi session dalam JSON
+    size_t sessionPos = content.find("\"session\"");
+    if (sessionPos == string::npos)
+    {
+        // Jika tidak ada session, tambahkan sebelum closing brace terakhir
+        size_t lastBrace = content.rfind('}');
+        if (lastBrace != string::npos)
+        {
+            string sessionData = ",\n    \"session\": {\n";
+            sessionData += "        \"user_id\": " + to_string(user.id) + ",\n";
+            sessionData += "        \"nama\": \"" + escapeJson(user.name) + "\",\n";
+            sessionData += "        \"role\": \"" + escapeJson(user.role) + "\",\n";
+            sessionData += "        \"username\": \"" + escapeJson(user.username) + "\"\n";
+            sessionData += "    }";
+            
+            content.insert(lastBrace, sessionData);
+        }
+    }
+    else
+    {
+        // Jika sudah ada session, update datanya
+        size_t sessionStart = content.find('{', sessionPos);
+        size_t sessionEnd = content.find('}', sessionStart);
+        
+        if (sessionStart != string::npos && sessionEnd != string::npos)
+        {
+            string newSessionData = "{\n";
+            newSessionData += "        \"user_id\": " + to_string(user.id) + ",\n";
+            newSessionData += "        \"nama\": \"" + escapeJson(user.name) + "\",\n";
+            newSessionData += "        \"role\": \"" + escapeJson(user.role) + "\",\n";
+            newSessionData += "        \"username\": \"" + escapeJson(user.username) + "\"\n";
+            newSessionData += "    }";
+            
+            content.replace(sessionStart, sessionEnd - sessionStart + 1, newSessionData);
+        }
+    }
+
+    // Simpan kembali ke file
+    ofstream outFile("database.json");
+    if (outFile.is_open())
+    {
+        outFile << content;
+        outFile.close();
+        cout << "Session berhasil disimpan untuk user: " << user.name << endl;
+    }
+    else
+    {
+        cout << "Gagal menyimpan session ke database.json\n";
+    }
+}
+
+// Fungsi untuk membersihkan session saat logout
+void Auth::clearSession()
+{
+    ifstream inFile("database.json");
+    if (!inFile.is_open())
+    {
+        return;
+    }
+
+    string content((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+    inFile.close();
+
+    // Cari dan hapus/kosongkan session
+    size_t sessionPos = content.find("\"session\"");
+    if (sessionPos != string::npos)
+    {
+        size_t sessionStart = content.find('{', sessionPos);
+        size_t sessionEnd = content.find('}', sessionStart);
+        
+        if (sessionStart != string::npos && sessionEnd != string::npos)
+        {
+            string emptySession = "{\n        \"user_id\": null,\n        \"nama\": null,\n        \"role\": null\n    }";
+            content.replace(sessionStart, sessionEnd - sessionStart + 1, emptySession);
+        }
+    }
+
+    ofstream outFile("database.json");
+    if (outFile.is_open())
+    {
+        outFile << content;
+        outFile.close();
+    }
+}
+
+// Fungsi untuk load session saat program dimulai
+bool Auth::loadSession()
+{
+    ifstream inFile("database.json");
+    if (!inFile.is_open())
+    {
+        return false;
+    }
+
+    string content((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+    inFile.close();
+
+    // Parse session data
+    size_t sessionPos = content.find("\"session\"");
+    if (sessionPos == string::npos)
+        return false;
+
+    size_t sessionStart = content.find('{', sessionPos);
+    size_t sessionEnd = content.find('}', sessionStart);
+    
+    if (sessionStart == string::npos || sessionEnd == string::npos)
+        return false;
+
+    string sessionData = content.substr(sessionStart + 1, sessionEnd - sessionStart - 1);
+    
+    // Parse session fields
+    int userId = 0;
+    string nama, role;
+    
+    // Simple parsing untuk session data
+    size_t pos = 0;
+    while (pos < sessionData.length())
+    {
+        size_t keyStart = sessionData.find('"', pos);
+        if (keyStart == string::npos) break;
+        
+        size_t keyEnd = sessionData.find('"', keyStart + 1);
+        if (keyEnd == string::npos) break;
+        
+        string key = sessionData.substr(keyStart + 1, keyEnd - keyStart - 1);
+        
+        size_t colonPos = sessionData.find(':', keyEnd);
+        if (colonPos == string::npos) break;
+        
+        size_t valueStart = sessionData.find_first_not_of(" \t", colonPos + 1);
+        if (valueStart == string::npos) break;
+        
+        string value;
+        if (sessionData[valueStart] == '"')
+        {
+            size_t valueEnd = sessionData.find('"', valueStart + 1);
+            if (valueEnd == string::npos) break;
+            value = sessionData.substr(valueStart + 1, valueEnd - valueStart - 1);
+            pos = valueEnd + 1;
+        }
+        else if (sessionData.substr(valueStart, 4) == "null")
+        {
+            pos = valueStart + 4;
+            continue; // Skip null values
+        }
+        else
+        {
+            size_t valueEnd = sessionData.find_first_of(",}", valueStart);
+            if (valueEnd == string::npos) valueEnd = sessionData.length();
+            value = sessionData.substr(valueStart, valueEnd - valueStart);
+            
+            while (!value.empty() && isspace(value.back()))
+                value.pop_back();
+            pos = valueEnd;
+        }
+        
+        if (key == "user_id" && !value.empty())
+            userId = stoi(value);
+        else if (key == "nama")
+            nama = value;
+        else if (key == "role")
+            role = value;
+    }
+    
+    // Jika ada session yang valid, load user data
+    if (userId > 0 && !nama.empty() && !role.empty())
+    {
+        // Load full user data from users array
+        vector<JsonUser> users = parseJsonUsers(content);
+        for (const JsonUser &user : users)
+        {
+            if (user.id == userId)
+            {
+                currentUser = User(user.username, user.password, user.name, user.email, user.phone, user.role);
+                loggedIn = true;
+                cout << "Session ditemukan. Selamat datang kembali, " << nama << "!" << endl;
+                return true;
+            }
+        }
+    }
+    
+    return false;
 }
 
 void Auth::viewProfile()
@@ -290,7 +436,7 @@ void Auth::loginUser()
     cin >> uname;
     pass = inputPassword();
 
-    // Read database.json
+    // Baca database.json
     ifstream inFile("database.json");
     if (!inFile.is_open())
     {
@@ -303,99 +449,33 @@ void Auth::loginUser()
 
     vector<JsonUser> users = parseJsonUsers(content);
 
-    bool found = false;
+    bool loginSuccess = false; // Flag untuk menandakan status login
+
+    // Loop mencari user yang cocok
     for (const JsonUser &user : users)
     {
+        cout << "Memeriksa user: " << user.username << " dengan password: " << user.password << endl;
+ // Menampilkan username yang sedang diperiksa
+
+        // Periksa apakah username dan password cocok
         if (user.username == uname && user.password == pass)
         {
             currentUser = User(user.username, user.password, user.name, user.email, user.phone, user.role);
             loggedIn = true;
-            found = true;
+            loginSuccess = true;
+
+            updateSession(user);
+
+            cout << "Login berhasil! Selamat datang, " << user.name << endl;
             break;
         }
     }
 
-    if (found)
-    {
-        cout << "Login berhasil!\n";
-    }
-    else
-    {
-        cout << "Login gagal. Username atau password salah.\n";
-    }
+    // if (!loginSuccess)
+    // {
+    //     cout << "Login gagal. Username atau password salah.\n";
+    // }
 }
-
-// void Auth::registerUser() {
-//     string uname, pass, nama, email, phone;
-//     cout << "Username: ";
-//     cin >> uname;
-
-//     pass = inputPassword();
-
-//     cin.ignore();
-//     cout << "Nama lengkap: ";
-//     getline(cin, nama);
-//     cout << "Email: ";
-//     getline(cin, email);
-
-//     // Validate phone number
-//     do {
-//         cout << "No. Telepon (hanya angka): ";
-//         getline(cin, phone);
-//         if (!isValidPhoneNumber(phone)) {
-//             cout << "No. telepon hanya boleh berisi angka!\n";
-//         }
-//     } while (!isValidPhoneNumber(phone));
-
-//     // Read existing database
-//     vector<JsonUser> users;
-//     ifstream inFile("database.json");
-//     if (inFile.is_open()) {
-//         string content((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
-//         inFile.close();
-//         users = parseJsonUsers(content);
-//     }
-
-//     // Check if username already exists
-//     for (const JsonUser& user : users) {
-//         if (user.username == uname) {
-//             cout << "Username sudah terdaftar!\n";
-//             return;
-//         }
-//     }
-
-//     // Find max ID
-//     int maxId = 0;
-//     for (const JsonUser& user : users) {
-//         maxId = max(maxId, user.id);
-//     }
-
-//     // Create new user
-//     JsonUser newUser;
-//     newUser.id = maxId + 1;
-//     newUser.username = uname;
-//     newUser.password = pass;
-//     newUser.name = nama;
-//     newUser.email = email;
-//     newUser.phone = phone;
-//     newUser.role = "user";
-
-//     users.push_back(newUser);
-
-//     // Save to database.json
-//     ofstream outFile("database.json");
-//     if (outFile.is_open()) {
-//         outFile << generateJsonFromUsers(users);
-//         outFile.close();
-//         cout << "Registrasi berhasil!\n";
-
-//         // Auto login after registration
-//         currentUser = User(uname, pass, nama, email, phone, "user");
-//         loggedIn = true;
-//     } else {
-//         cout << "Gagal Register.\n";
-//     }
-// }
 
 void Auth::registerUser()
 {
@@ -420,52 +500,95 @@ void Auth::registerUser()
         }
     } while (!isValidPhoneNumber(phone));
 
-    vector<JsonUser> users;
+    // Baca seluruh file JSON
     ifstream inFile("database.json");
-    if (inFile.is_open())
+    if (!inFile.is_open())
     {
-        string content((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
-        inFile.close();
-        users = parseJsonUsers(content);
-
-        cout << "[DEBUG] Jumlah user sebelum register: " << users.size() << endl;
+        cout << "Gagal membuka database.json\n";
+        return;
     }
 
-    for (const JsonUser &user : users)
+    string content((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+    inFile.close();
+
+    try
     {
-        if (user.username == uname)
+        // Parse JSON menggunakan nlohmann::json
+        json jsonData = json::parse(content);
+        
+        // Pastikan array users ada
+        if (!jsonData.contains("users") || !jsonData["users"].is_array())
         {
-            cout << "Username sudah terdaftar!\n";
+            cout << "Format database.json tidak valid - array 'users' tidak ditemukan\n";
             return;
         }
+
+        // Cek apakah username sudah ada
+        for (auto &user : jsonData["users"])
+        {
+            if (user.contains("username") && user["username"] == uname)
+            {
+                cout << "Username sudah terdaftar!\n";
+                return;
+            }
+        }
+
+        // Cari ID tertinggi untuk user baru
+        int maxId = 0;
+        for (auto &user : jsonData["users"])
+        {
+            if (user.contains("id") && user["id"].is_number())
+            {
+                maxId = max(maxId, (int)user["id"]);
+            }
+        }
+
+        // Buat user baru
+        json newUser;
+        newUser["id"] = maxId + 1;
+        newUser["username"] = uname;
+        newUser["password"] = pass;
+        newUser["name"] = nama;
+        newUser["email"] = email;
+        newUser["phone"] = phone;
+        newUser["role"] = "user";
+        newUser["matakuliah"] = json::array(); // Array kosong untuk matakuliah
+
+        // Tambahkan user baru ke array users
+        jsonData["users"].push_back(newUser);
+
+        cout << "[DEBUG] Jumlah user setelah register: " << jsonData["users"].size() << endl;
+
+        // Simpan kembali ke file dengan format yang rapi
+        ofstream outFile("database.json");
+        if (outFile.is_open())
+        {
+            outFile << jsonData.dump(4); // Pretty print dengan indentasi 4 spasi
+            outFile.close();
+            cout << "Registrasi berhasil!\n";
+
+            // Set user sebagai logged in
+            currentUser = User(uname, pass, nama, email, phone, "user");
+            loggedIn = true;
+
+            // Update session dengan user baru
+            JsonUser sessionUser{maxId + 1, uname, pass, nama, email, phone, "user"};
+            updateSession(sessionUser);
+        }
+        else
+        {
+            cout << "Gagal membuka database.json untuk menyimpan.\n";
+        }
     }
-
-    int maxId = 0;
-    for (const JsonUser &user : users)
+    catch (const json::parse_error &e)
     {
-        maxId = max(maxId, user.id);
+        cout << "Error parsing JSON: " << e.what() << endl;
+        return;
     }
-
-    JsonUser newUser{maxId + 1, uname, pass, nama, email, phone, "user"};
-    users.push_back(newUser);
-    cout << "[DEBUG] Jumlah user setelah register: " << users.size() << endl;
-
-    ofstream outFile("database.json");
-    if (outFile.is_open())
+    catch (const std::exception &e)
     {
-        string jsonOutput = generateJsonFromUsers(users);
-        cout << "\n[DEBUG] Menyimpan ke database.json:\n"
-             << jsonOutput << endl;
-        outFile << jsonOutput;
-        outFile.close();
-        cout << "Registrasi berhasil!\n";
-
-        currentUser = User(uname, pass, nama, email, phone, "user");
-        loggedIn = true;
-    }
-    else
-    {
-        cout << "Gagal membuka database.json untuk menyimpan.\n";
+        cout << "Error: " << e.what() << endl;
+        return;
     }
 }
 
@@ -576,6 +699,7 @@ void Auth::changePassword()
 
 void Auth::logout()
 {
+    clearSession();
     loggedIn = false;
     cout << "Berhasil logout.\n";
 }
