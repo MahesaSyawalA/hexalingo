@@ -8,6 +8,7 @@ using json = nlohmann::json;
 
 // Tambahkan include fitur.cpp untuk akses adminMenu() dan userMenu()
 #include "fitur.cpp"
+#include "fitur-jakoy.cpp"
 
 using namespace std;
 
@@ -75,50 +76,78 @@ int main()
 
             if (currentUser->getRole() == "admin")
             {
-                adminMenu(); // Call admin menu
+                cout << "Anda Login Sebagai Admin"<<endl;
+                // After the menu returns, ask user what to do next
+                cout << "\n========================================\n";
+                cout << "Selamat data di Aplikasi Hexalingo\n";
+                cout << "1. Profil \n";
+                cout << "2. Matakuliah & Materi Pembelajaran \n";
+                cout << "3. Logout\n";
+                cout << "4. Exit (session tetap aktif)\n";
+                cout << "========================================\n";
+                cout << "Pilihan: ";
+
+                int postMenuChoice;
+                cin >> postMenuChoice;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                switch (postMenuChoice)
+                {
+                    case 1:
+                        mainProfile();
+                        break; 
+                    case 2:
+                        adminMenu();
+                        break;
+                    case 3:
+                        auth.logout();
+                        return 0; // Exit the program
+                    case 4:
+                        return 0; // Exit the program
+                    default:
+                        cout << "Pilihan tidak valid. Logout otomatis...\n";
+                        auth.logout();
+                        break;
+                }
             }
             else
             {
-                userMenu(); // Call user menu
+                cout << "Anda Login Sebagai User"<<endl;
+                cout << "\n========================================\n";
+                cout << "Selamat data di Aplikasi Hexalingo\n";
+                cout << "1. Profil \n";
+                cout << "2. Matakuliah & Materi Pembelajaran \n";
+                cout << "3. Logout\n";
+                cout << "4. Exit (session tetap aktif)\n";
+                cout << "========================================\n";
+                cout << "Pilihan: ";
+
+                int postMenuChoice;
+                cin >> postMenuChoice;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                switch (postMenuChoice)
+                {
+                    case 1:
+                        mainProfile();
+                        break; 
+                    case 2:
+                        userMenu();
+                        break;
+                    case 3:
+                        auth.logout();
+                        return 0; // Exit the program
+                    case 4:
+                        return 0; // Exit the program
+                    default:
+                        cout << "Pilihan tidak valid. Logout otomatis...\n";
+                        auth.logout();
+                        break;
+                }
+                // userMenu(); // Call user menu
             }
 
-            // After the menu returns, ask user what to do next
-            cout << "\n========================================\n";
-            cout << "Apa yang ingin Anda lakukan?\n";
-            cout << "1. Kembali ke menu utama (tetap login)\n"; // This option will now take you back to the main login/register menu
-            cout << "2. Logout\n";
-            cout << "3. Exit (session tetap aktif)\n";
-            cout << "========================================\n";
-            cout << "Pilihan: ";
-
-            int postMenuChoice;
-            cin >> postMenuChoice;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-            switch (postMenuChoice)
-            {
-                case 1:
-                    // Choosing 1 means "return to main menu (logged out state for this loop)"
-                    // To do this, we need to explicitly logout so the main loop
-                    // will then show the login/register menu.
-                    // If you truly want to "stay logged in" and go back to *your specific role menu*,
-                    // you would need a different flow or a sub-loop within adminMenu/userMenu.
-                    // For now, let's assume "Kembali ke menu utama" means going back to the login/register screen.
-                    auth.logout(); // Force logout to go back to the main (login/register) menu
-                    cout << "Anda telah logout untuk kembali ke menu utama. Silakan login lagi jika ingin mengakses fitur.\n";
-                    break; 
-                case 2:
-                    auth.logout();
-                    cout << "Anda telah logout. Kembali ke menu utama...\n";
-                    break;
-                case 3:
-                    cout << "Session tetap aktif. Sampai jumpa!\n";
-                    return 0; // Exit the program
-                default:
-                    cout << "Pilihan tidak valid. Logout otomatis...\n";
-                    auth.logout();
-                    break;
-            }
+            
         }
         else // User is NOT logged in
         {

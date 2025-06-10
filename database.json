@@ -114,10 +114,9 @@
         }
     ],
     "session": {
-        "user_id": 3,
-        "nama": "admin12",
-        "role": "admin",
-        "username": "3"
+        "user_id": null,
+        "nama": null,
+        "role": null
     },
     "tugas": [
         {
@@ -325,6 +324,16 @@
             "phone": "12312",
             "role": "user",
             "username": "jomok"
+        },
+        {
+            "email": "asdfasd",
+            "id": 5,
+            "matakuliah": [],
+            "name": "asdfad",
+            "password": "",
+            "phone": "",
+            "role": "user",
+            "username": "jujuju"
         }
     ]
 }
