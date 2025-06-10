@@ -10,6 +10,7 @@ using json = nlohmann::json;
 using namespace std;
 
 struct Materi {
+    string id;
     string judul;
     vector<Materi> subMateri;
 };
@@ -37,35 +38,30 @@ char inputYaTidak(const string& prompt) {
 }
 
 // ---------- Konversi JSON ----------
-json materiToJson(const Materi& materi, int level = 0) {
+json materiToJson(const Materi& materi) {
     json j;
+    j["id"] = materi.id;
     j["judul"] = materi.judul;
 
-    if (level == 0)
-        j["materi"] = json::array();
-    else if (level == 1)
+    if (materi.subMateri.size() > 0) {
         j["submateri"] = json::array();
-
-    for (const auto& sub : materi.subMateri) {
-        if (level == 0)
-            j["materi"].push_back(materiToJson(sub, level + 1));
-        else if (level == 1)
-            j["submateri"].push_back(materiToJson(sub, level + 1));
+        for (const auto& sub : materi.subMateri) {
+            j["submateri"].push_back(materiToJson(sub));
+        }
     }
 
     return j;
 }
 
-Materi jsonToMateri(const json& j, int level = 0) {
+Materi jsonToMateri(const json& j) {
     Materi m;
+    m.id = j.value("id", "");
     m.judul = j.value("judul", "");
 
-    if (level == 0 && j.contains("materi")) {
-        for (const auto& sub : j["materi"])
-            m.subMateri.push_back(jsonToMateri(sub, level + 1));
-    } else if (level == 1 && j.contains("submateri")) {
-        for (const auto& sub : j["submateri"])
-            m.subMateri.push_back(jsonToMateri(sub, level + 1));
+    if (j.contains("submateri")) {
+        for (const auto& sub : j["submateri"]) {
+            m.subMateri.push_back(jsonToMateri(sub));
+        }
     }
 
     return m;
@@ -78,6 +74,7 @@ string toLower(const string& str) {
     });
     return result;
 }
+
 // ---------- Load / Save ----------
 const string DATABASE_FILENAME = "database.json";
 
@@ -118,21 +115,26 @@ void loadFromJsonFile(const string& filePath) {
     }
 }
 
-// ---------- Tambah Materi ----------
-void tambahMateri(Materi& materi, int level = 1) {
-    string indent(level * 2, ' ');
-    cout << indent << "Masukkan Judul Materi (Level " << level << "): ";
-    
-    getline(cin, materi.judul);
-    while (materi.judul.empty()) {
-        cout << indent << "Judul tidak boleh kosong, ulangi: ";
-        getline(cin, materi.judul);
-        materi.judul = toLower(materi.judul);
+// Fungsi untuk menghasilkan ID baru
+string generateNewId(const string& parentId, int urutan) {
+    if (parentId.empty()) {
+        return to_string(urutan); // Mata Pelajaran
+    } else {
+        return parentId + "." + to_string(urutan);
     }
+}
 
-    while (inputYaTidak(indent + "Tambah sub-materi \"" + materi.judul + "\"?") == 'y') {
+// ---------- Tambah Materi ----------
+void tambahMateri(Materi& materi, const string& parentId, int urutan) {
+    materi.id = generateNewId(parentId, urutan);
+    cout << "Masukkan Judul Materi (ID: " << materi.id << "): ";
+    getline(cin, materi.judul);
+    materi.judul = toLower(materi.judul);
+
+    int subUrutan = 1;
+    while (inputYaTidak("Tambah sub-materi \"" + materi.judul + "\"?") == 'y') {
         Materi sub;
-        tambahMateri(sub, level + 1);
+        tambahMateri(sub, materi.id, subUrutan++);
         materi.subMateri.push_back(sub);
     }
 }
@@ -153,7 +155,9 @@ void tambahMateriKeRoot() {
     Materi baru;
     clearScreen();
     cout << "=== Tambah Mata Pelajaran ===\n";
-    cout << "Masukkan Judul: ";
+    int urutan = rootMateriList.size() + 1;
+    baru.id = to_string(urutan);
+    cout << "Masukkan Judul Mata Pelajaran: ";
     getline(cin, baru.judul);
 
     while (baru.judul.empty() || isDuplicateTitle(rootMateriList, baru.judul)) {
@@ -165,9 +169,10 @@ void tambahMateriKeRoot() {
         getline(cin, baru.judul);
     }
 
+    int subUrutan = 1;
     while (inputYaTidak("Tambah materi ke \"" + baru.judul + "\"?") == 'y') {
         Materi sub;
-        tambahMateri(sub, 1);
+        tambahMateri(sub, baru.id, subUrutan++);
         baru.subMateri.push_back(sub);
     }
 
@@ -197,8 +202,6 @@ void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string
         tampilkanMateriFormatBaru(materi.subMateri[i], level + 1, newPrefix);
     }
 }
-
-
 
 void searchMateri(const json& data, const string& keyword) {
     bool ditemukan = false;
@@ -240,8 +243,6 @@ void searchMateri(const json& data, const string& keyword) {
     string dummy;
     getline(cin, dummy);
 }
-
-
 
 void tampilkanSemuaMateri() {
     loadFromJsonFile(DATABASE_FILENAME);

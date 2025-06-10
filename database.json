@@ -1,37 +1,40 @@
 {
     "daftar_mata_pelajaran": [
         {
-            "judul": "mahesa",
-            "materi": [
-                {
-                    "judul": "mahesa",
-                    "submateri": []
-                }
-            ]
+            "id": "",
+            "judul": "mahesa"
         },
         {
-            "judul": "SDA",
-            "materi": [
+            "id": "",
+            "judul": "SDA"
+        },
+        {
+            "id": "",
+            "judul": "Matdis"
+        },
+        {
+            "id": "4",
+            "judul": "Landasan Pendidikan",
+            "submateri": [
                 {
-                    "judul": "Kombinasi",
+                    "id": "4.1",
+                    "judul": "psikologis",
                     "submateri": [
                         {
-                            "judul": "Cara Tree"
+                            "id": "4.1.1",
+                            "judul": "pendidikan dengan psikologis"
                         }
                     ]
-                }
-            ]
-        },
-        {
-            "judul": "Matdis",
-            "materi": [
-                {
-                    "judul": "Graf",
-                    "submateri": []
                 },
                 {
-                    "judul": "Tree",
-                    "submateri": []
+                    "id": "4.2",
+                    "judul": "filosofi",
+                    "submateri": [
+                        {
+                            "id": "4.2.1",
+                            "judul": "filsafat"
+                        }
+                    ]
                 }
             ]
         }
