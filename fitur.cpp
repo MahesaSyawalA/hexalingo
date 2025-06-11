@@ -235,8 +235,16 @@ void searchMateri(const json& data, const string& keyword) {
     cout << "Hasil pencarian materi untuk judul: \"" << keyword << "\"\n\n";
 
     for (const auto& pelajaran : data["daftar_mata_pelajaran"]) {
+        if (!pelajaran.contains("judul")) continue;
+
         string mapel_judul = pelajaran["judul"];
-        for (const auto& materi : pelajaran["materi"]) {
+
+        // Gunakan "submateri" sebagai gantinya
+        if (!pelajaran.contains("submateri")) continue;
+
+        for (const auto& materi : pelajaran["submateri"]) {
+            if (!materi.contains("judul")) continue;
+
             string materi_judul = materi["judul"];
             string materi_judul_lower = toLower(materi_judul);
 
@@ -248,7 +256,8 @@ void searchMateri(const json& data, const string& keyword) {
                 if (materi.contains("submateri") && !materi["submateri"].empty()) {
                     cout << "Submateri:\n";
                     for (const auto& sub : materi["submateri"]) {
-                        cout << " - " << sub["judul"] << endl;
+                        if (sub.contains("judul"))
+                            cout << " - " << sub["judul"] << endl;
                     }
                 } else {
                     cout << "(Tidak ada submateri)\n";
@@ -265,6 +274,7 @@ void searchMateri(const json& data, const string& keyword) {
     string dummy;
     getline(cin, dummy);
 }
+
 
 void tampilkanSemuaMateri() {
     loadFromJsonFile(DATABASE_FILENAME);

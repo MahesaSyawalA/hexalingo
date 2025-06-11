@@ -87,6 +87,23 @@
                     ]
                 }
             ]
+        },
+        {
+            "id": "8",
+            "judul": "WECC",
+            "submateri": [
+                {
+                    "id": "8.1",
+                    "judul": "wecc",
+                    "submateri": [
+                        {
+                            "id": "8.1.1",
+                            "isi": "asdadasda",
+                            "judul": "wecccc"
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "jawaban": [
