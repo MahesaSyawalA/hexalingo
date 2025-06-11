@@ -7,8 +7,9 @@
 
 using json = nlohmann::json;
 using namespace std;
-
-json db;
+extern json db;
+const string filename = "database.json";
+string role = db["session"]["role"];
 
 bool loadDatabase(const string &filename) {
     ifstream file(filename);
@@ -455,56 +456,7 @@ void hapusKontrakMapel(const json &materiList, int user_id) {
     }
 }
 
-int main() {
-    const string filename = "database.json";
-    if (!loadDatabase(filename)) return 1;
-
-    string role = db["session"]["role"];
-    int pilihan;
-
-    do {
-        cout << "\n=== DASHBOARD " << (role == "admin" ? "ADMIN" : "USER") << " ===\n";
-
-        if (role == "admin") {
-            cout << "1. Tambah Tugas\n";
-            cout << "2. Lihat Semua Tugas\n";
-            cout << "3. Lihat Detail Tugas\n";
-            cout << "4. Tampilkan Semua Materi\n";
-            cout << "5. Simpan dan Keluar\n";
-        } else {
-            cout << "1. Lihat Semua Tugas\n";
-            cout << "2. Tampilkan Semua Materi\n";
-            cout << "3. Kontrak Mata Pelajaran\n";
-            cout << "4. Hapus Kontrak Mata Pelajaran\n";
-            cout << "5. Kerjakan Tugas\n";
-            cout << "6. Keluar\n";
-        }
-
-        cout << "Pilih: ";
-        cin >> pilihan;
-
-        if (role == "admin") {
-            switch (pilihan) {
-                case 1: tampilkanDaftarMateri(db["daftar_mata_pelajaran"]); tambahTugas(); saveDatabase(filename); break;
-                case 2: tampilkanSemuaTugas(); break;
-                case 3: tampilkanDetailTugas(); break;
-                case 4: tampilkanDaftarMateri(db["daftar_mata_pelajaran"]); break;
-                case 5: saveDatabase(filename); cout << "Data disimpan.\n"; break;
-                default: cout << "Pilihan tidak valid.\n";
-            }
-        } else {
-            switch (pilihan) {
-                case 1: tampilkanSemuaTugasUntukUser(db["session"]["user_id"]); break;
-                case 2: tampilkanDaftarMateri(db["daftar_mata_pelajaran"]); break;
-                case 3: kontrakmapel(db["daftar_mata_pelajaran"], db["session"]["user_id"]);break;
-                case 4: hapusKontrakMapel(db["daftar_mata_pelajaran"], db["session"]["user_id"]);break; 
-                case 5: kerjakanTugas(); break;
-                case 6: cout << "Keluar...\n"; break;
-                default: cout << "Pilihan tidak valid.\n";
-            }
-        }
-
-    } while ((role == "admin" && pilihan != 5) || (role != "admin" && pilihan != 4));
-
-    return 0;
+int mainkontrak()
+{
+    kontrakmapel(db["daftar_mata_pelajaran"], db["session"]["user_id"]);
 }

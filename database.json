@@ -123,13 +123,21 @@
             ],
             "nilai": 100.0,
             "user_id": 3
+        },
+        {
+            "id_tugas": 0,
+            "jawaban": [
+                "A"
+            ],
+            "nilai": 0.0,
+            "user_id": 4
         }
     ],
     "session": {
-        "nama": "admin12",
+        "user_id": 5,
+        "nama": "asdfad",
         "role": "user",
-        "user_id": 3,
-        "username": "3"
+        "username": "jujuju"
     },
     "tugas": [
         {
@@ -199,7 +207,9 @@
         {
             "email": "asdfas",
             "id": 4,
-            "mata_pelajaran": [],
+            "mata_pelajaran": [
+                7
+            ],
             "name": "jomoknyeu",
             "password": "jomok",
             "phone": "12312",
