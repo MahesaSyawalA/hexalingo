@@ -108,19 +108,19 @@ void saveProfilesToJson(const string& filename) {
     if (outFile.is_open()) {
         outFile << data.dump(4);
         outFile.close();
-        cout << "📁 Data berhasil disimpan.\n";
+        cout << "Data berhasil disimpan.\n";
     } else {
-        cout << "❌ Gagal menyimpan ke file.\n";
+        cout << "Gagal menyimpan ke file.\n";
     }
 }
 
 void tampilkanDaftarProfile() {
     if (!profileHead) {
-        cout << "📭 Tidak ada profile yang terdaftar.\n";
+        cout << "Tidak ada profile yang terdaftar.\n";
         return;
     }
 
-    cout << "\n📋 DAFTAR PROFILE TERDAFTAR\n\n";
+    cout << "\nDAFTAR PROFILE TERDAFTAR\n\n";
     
     // Header tabel
     cout << "+----+----------------------+----------------------+----------------------+----------+\n";
@@ -160,7 +160,7 @@ void tambahProfileBaru(string username, string namaLengkap, string email, string
     ProfileNode* current = profileHead;
     while (current) {
         if (current->profile.profileJson["username"] == username) {
-            cout << "⚠️  Username sudah terdaftar.\n";
+            cout << "Username sudah terdaftar.\n";
             return;
         }
         current = current->next;
@@ -186,7 +186,7 @@ void tambahProfileBaru(string username, string namaLengkap, string email, string
         current->next = newProfileNode;
     }
 
-    cout << "✅ Profile berhasil ditambahkan!\n";
+    cout << "Profile berhasil ditambahkan!\n";
 }
 
 void hapusProfile(string username) {
@@ -199,14 +199,14 @@ void hapusProfile(string username) {
             else prev->next = current->next;
 
             delete current;
-            cout << "🗑️  Profile berhasil dihapus.\n";
+            cout << "Profile berhasil dihapus.\n";
             return;
         }
         prev = current;
         current = current->next;
     }
 
-    cout << "⚠️  Profile tidak ditemukan.\n";
+    cout << "Profile tidak ditemukan.\n";
 }
 
 void lihatDetailProfile(string username) {
@@ -222,7 +222,7 @@ void lihatDetailProfile(string username) {
         }
         current = current->next;
     }
-    cout << "⚠️  Profile tidak ditemukan.\n";
+    cout << "Profile tidak ditemukan.\n";
 }
 
 void tampilkanProfileMenu() {
@@ -306,7 +306,7 @@ int mainProfile() {
                 break;
 
             default:
-                cout << "❌ Pilihan tidak valid. Silakan pilih 1-5.\n";
+                cout << "Pilihan tidak valid. Silakan pilih 1-5.\n";
         }
 
     } while (pilihan != 5 && isAdmin());
