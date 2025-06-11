@@ -8,6 +8,7 @@ using json = nlohmann::json;
 
 // Tambahkan include fitur.cpp untuk akses adminMenu() dan userMenu()
 #include "fitur.cpp"
+#include "feature3.cpp"
 #include "fitur-jakoy.cpp"
 
 using namespace std;
@@ -82,8 +83,9 @@ int main()
                 cout << "Selamat data di Aplikasi Hexalingo\n";
                 cout << "1. Profil \n";
                 cout << "2. Matakuliah & Materi Pembelajaran \n";
-                cout << "3. Logout\n";
-                cout << "4. Exit (session tetap aktif)\n";
+                cout << "3. Tugas Menu\n";
+                cout << "4. Logout\n";
+                cout << "5. Exit (session tetap aktif)\n";
                 cout << "========================================\n";
                 cout << "Pilihan: ";
 
@@ -100,9 +102,12 @@ int main()
                         adminMenu();
                         break;
                     case 3:
+                        mainKuis();
+                        return 0; 
+                    case 4:
                         auth.logout();
                         return 0; // Exit the program
-                    case 4:
+                    case 5:
                         return 0; // Exit the program
                     default:
                         cout << "Pilihan tidak valid. Logout otomatis...\n";
@@ -118,7 +123,8 @@ int main()
                 cout << "1. Profil \n";
                 cout << "2. Matakuliah & Materi Pembelajaran \n";
                 cout << "3. Logout\n";
-                cout << "4. Exit (session tetap aktif)\n";
+                cout << "4. Tugas Menu\n";
+                cout << "5. Exit (session tetap aktif)\n";
                 cout << "========================================\n";
                 cout << "Pilihan: ";
 
@@ -138,6 +144,9 @@ int main()
                         auth.logout();
                         return 0; // Exit the program
                     case 4:
+                        mainKuis();
+                        return 0;
+                    case 5:
                         return 0; // Exit the program
                     default:
                         cout << "Pilihan tidak valid. Logout otomatis...\n";
