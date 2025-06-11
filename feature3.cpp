@@ -596,7 +596,7 @@ void prosesAntrianTugas() {
     cout << "\nSeluruh tugas dalam antrian telah selesai.\n";
 }
 
-int mainKuis() {
+int mainTugas() {
     const string filename = "database.json";
     if (!loadDatabase(filename)) return 1;
 
