@@ -1,0 +1,369 @@
+{
+    "daftar_mata_pelajaran": [
+        {
+            "id": "",
+            "judul": "mahesa"
+        },
+        {
+            "id": "",
+            "judul": "SDA"
+        },
+        {
+            "id": "",
+            "judul": "Matdis"
+        },
+        {
+            "id": "4",
+            "judul": "Landasan Pendidikan",
+            "submateri": [
+                {
+                    "id": "4.1",
+                    "judul": "psikologis",
+                    "submateri": [
+                        {
+                            "id": "4.1.1",
+                            "judul": "pendidikan dengan psikologis"
+                        }
+                    ]
+                },
+                {
+                    "id": "4.2",
+                    "judul": "filosofi",
+                    "submateri": [
+                        {
+                            "id": "4.2.1",
+                            "judul": "filsafat"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "jawaban": [
+        {
+            "id_tugas": 1,
+            "id_user": 1,
+            "jawaban_user": [
+                {
+                    "id_soal": 1,
+                    "jawaban": "Graf dalam matematika diskrit adalah struktur diskrit yang terdiri dari himpunan simpul (vertex) yang terhubung oleh sisi (edge) yang merepresentasikan hubungan antara simpul-simpul tersebut."
+                },
+                {
+                    "id_soal": 2,
+                    "jawaban": "1. Graf sederhana: graf tanpa loop atau sisi ganda\n2. Graf lengkap: graf sederhana dimana setiap pasang simpul berbeda terhubung oleh sisi\n3. Graf bipartit: graf yang simpulnya dapat dibagi menjadi dua himpunan disjoint"
+                },
+                {
+                    "id_soal": 3,
+                    "jawaban": "28 sisi"
+                },
+                {
+                    "id_soal": 4,
+                    "jawaban": "D"
+                },
+                {
+                    "id_soal": 5,
+                    "jawaban": "A"
+                },
+                {
+                    "id_soal": 6,
+                    "jawaban": "A"
+                },
+                {
+                    "id_soal": 7,
+                    "jawaban": "D"
+                },
+                {
+                    "id_soal": 8,
+                    "jawaban": "C"
+                }
+            ],
+            "nilai": {
+                "detail_nilai": [
+                    {
+                        "id_soal": 1,
+                        "nilai": 20
+                    },
+                    {
+                        "id_soal": 2,
+                        "nilai": 30
+                    },
+                    {
+                        "id_soal": 3,
+                        "nilai": 25
+                    },
+                    {
+                        "id_soal": 4,
+                        "nilai": 25
+                    },
+                    {
+                        "id_soal": 5,
+                        "nilai": 15
+                    },
+                    {
+                        "id_soal": 6,
+                        "nilai": 20
+                    },
+                    {
+                        "id_soal": 7,
+                        "nilai": 20
+                    },
+                    {
+                        "id_soal": 8,
+                        "nilai": 20
+                    }
+                ],
+                "total_nilai": 175
+            }
+        }
+    ],
+    "matakuliah": [
+        {
+            "id": 1,
+            "nama": "Matematika Diskrit"
+        },
+        {
+            "id": 2,
+            "nama": "Desain Berpikir"
+        },
+        {
+            "id": 3,
+            "nama": "Landasan Pendidikan"
+        },
+        {
+            "id": 4,
+            "nama": "Pendidikan Kewarga Negaraan"
+        },
+        {
+            "id": 5,
+            "nama": "Struktur Data dan Algoritma"
+        },
+        {
+            "id": 6,
+            "nama": "Rekayasa Kebutuhan Perangkat Lunak"
+        }
+    ],
+    "session": {
+        "nama": "admin12",
+        "role": "admin",
+        "user_id": 3,
+        "username": "3"
+    },
+    "tugas": [
+        {
+            "id_matakuliah": 1,
+            "soal": [
+                {
+                    "bobot_nilai": 20,
+                    "id_soal": 1,
+                    "pertanyaan": "Apa yang dimaksud dengan graf dalam matematika diskrit?",
+                    "tipe": "essay"
+                },
+                {
+                    "bobot_nilai": 30,
+                    "id_soal": 2,
+                    "pertanyaan": "Sebutkan dan jelaskan 3 jenis graf sederhana!",
+                    "tipe": "essay"
+                },
+                {
+                    "bobot_nilai": 25,
+                    "id_soal": 3,
+                    "pertanyaan": "Hitunglah banyaknya sisi pada graf lengkap dengan 8 simpul (K₈)!",
+                    "tipe": "essay"
+                },
+                {
+                    "bobot_nilai": 25,
+                    "id_soal": 4,
+                    "jawaban_benar": "D",
+                    "pertanyaan": "Manakah dari berikut ini yang BUKAN merupakan sifat pohon?",
+                    "pilihan": [
+                        {
+                            "option": "A",
+                            "text": "Graf terhubung"
+                        },
+                        {
+                            "option": "B",
+                            "text": "Tidak memiliki sirkuit"
+                        },
+                        {
+                            "option": "C",
+                            "text": "Memiliki n-1 sisi untuk n simpul"
+                        },
+                        {
+                            "option": "D",
+                            "text": "Memiliki derajat simpul minimal 2"
+                        }
+                    ],
+                    "tipe": "pilihan_ganda"
+                },
+                {
+                    "bobot_nilai": 15,
+                    "id_soal": 5,
+                    "jawaban_benar": "A",
+                    "pertanyaan": "Manakah yang termasuk contoh graf bipartit?",
+                    "pilihan": [
+                        {
+                            "option": "A",
+                            "text": "Graf bintang"
+                        },
+                        {
+                            "option": "B",
+                            "text": "Graf lingkaran dengan simpul ganjil"
+                        },
+                        {
+                            "option": "C",
+                            "text": "Graf lengkap K₅"
+                        },
+                        {
+                            "option": "D",
+                            "text": "Semua jawaban salah"
+                        }
+                    ],
+                    "tipe": "pilihan_ganda"
+                },
+                {
+                    "bobot_nilai": 20,
+                    "id_soal": 6,
+                    "jawaban_benar": "A",
+                    "pertanyaan": "Jika suatu graf memiliki 6 sisi dan semua simpul berderajat 2, maka graf tersebut adalah:",
+                    "pilihan": [
+                        {
+                            "option": "A",
+                            "text": "Graf lingkaran"
+                        },
+                        {
+                            "option": "B",
+                            "text": "Graf bintang"
+                        },
+                        {
+                            "option": "C",
+                            "text": "Graf lengkap"
+                        },
+                        {
+                            "option": "D",
+                            "text": "Graf bipartit"
+                        }
+                    ],
+                    "tipe": "pilihan_ganda"
+                },
+                {
+                    "bobot_nilai": 20,
+                    "id_soal": 7,
+                    "jawaban_benar": "D",
+                    "pertanyaan": "Manakah pernyataan yang BENAR tentang graf Euler?",
+                    "pilihan": [
+                        {
+                            "option": "A",
+                            "text": "Semua simpul berderajat genap"
+                        },
+                        {
+                            "option": "B",
+                            "text": "Memiliki tepat dua simpul berderajat ganjil"
+                        },
+                        {
+                            "option": "C",
+                            "text": "Dapat dibuat sirkuit Euler"
+                        },
+                        {
+                            "option": "D",
+                            "text": "Semua jawaban benar"
+                        }
+                    ],
+                    "tipe": "pilihan_ganda"
+                },
+                {
+                    "bobot_nilai": 20,
+                    "id_soal": 8,
+                    "jawaban_benar": "C",
+                    "pertanyaan": "Kompleksitas waktu algoritma BFS pada graf dengan n simpul dan m sisi adalah:",
+                    "pilihan": [
+                        {
+                            "option": "A",
+                            "text": "O(n)"
+                        },
+                        {
+                            "option": "B",
+                            "text": "O(m)"
+                        },
+                        {
+                            "option": "C",
+                            "text": "O(n+m)"
+                        },
+                        {
+                            "option": "D",
+                            "text": "O(n log n)"
+                        }
+                    ],
+                    "tipe": "pilihan_ganda"
+                }
+            ],
+            "tengat_waktu": "01-07-2025",
+            "title": "Tugas Pertemuan 12"
+        }
+    ],
+    "users": [
+        {
+            "email": "mahesa@example.com",
+            "id": 1,
+            "matakuliah": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "name": "Mahesa Syawal",
+            "password": "mahesa",
+            "phone": "1",
+            "role": "user",
+            "username": "mahesa"
+        },
+        {
+            "email": "rina@example.com",
+            "id": 2,
+            "matakuliah": [
+                1,
+                2,
+                3
+            ],
+            "name": "Rina Oktavia",
+            "password": "2",
+            "phone": "1",
+            "role": "user",
+            "username": "2"
+        },
+        {
+            "email": "admin12@example.com",
+            "id": 3,
+            "matakuliah": [
+                1,
+                2,
+                3
+            ],
+            "name": "admin12",
+            "password": "3",
+            "phone": "1",
+            "role": "admin",
+            "username": "3"
+        },
+        {
+            "email": "asdfas",
+            "id": 4,
+            "matakuliah": [],
+            "name": "jomoknyeu",
+            "password": "jomok",
+            "phone": "12312",
+            "role": "user",
+            "username": "jomok"
+        },
+        {
+            "email": "asdfasd",
+            "id": 5,
+            "matakuliah": [],
+            "name": "asdfad",
+            "password": "",
+            "phone": "",
+            "role": "user",
+            "username": "jujuju"
+        }
+    ]
+}
