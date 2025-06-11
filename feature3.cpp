@@ -4,11 +4,58 @@
 #include "json.hpp"
 #include <vector>
 #include <string>
+#include <limits>
+#include <regex>
+#include <ctime>
 
 using json = nlohmann::json;
 using namespace std;
 
 json db;
+
+
+const int MAX_QUEUE = 100; // atau sesuaikan batas maksimal
+int queue[MAX_QUEUE];
+int frontQueue = 0;
+int rearQueue = -1;
+int queueSize = 0;
+
+// Fungsi dasar
+bool isFull(int kapasitas) {
+    return queueSize >= kapasitas;
+}
+
+bool isEmpty() {
+    return queueSize == 0;
+}
+
+void enqueue(int data, int kapasitas) {
+    if (!isFull(kapasitas)) {
+        rearQueue++;
+        queue[rearQueue] = data;
+        queueSize++;
+    } else {
+        cout << "Antrian penuh. Tidak dapat menambahkan tugas lagi.\n";
+    }
+}
+
+int dequeue() {
+    if (!isEmpty()) {
+        int data = queue[frontQueue];
+        frontQueue++;
+        queueSize--;
+        return data;
+    } else {
+        cout << "Antrian kosong.\n";
+        return -1;
+    }
+}
+
+void resetQueue() {
+    frontQueue = 0;
+    rearQueue = -1;
+    queueSize = 0;
+}
 
 bool loadDatabase(const string &filename) {
     ifstream file(filename);
@@ -92,12 +139,52 @@ void tampilkanDaftarMateri(const json &materiList, int indent = 0) {
     }
 }
 
+bool isValidDeadlineFormat(const std::string& deadline) {
+    std::regex pattern(R"(^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$)");
+    if (!std::regex_match(deadline, pattern)) return false;
+
+    int year, month, day, hour, minute;
+    if (sscanf(deadline.c_str(), "%d-%d-%d %d:%d", &year, &month, &day, &hour, &minute) != 5)
+        return false;
+
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;  // Bisa dikembangkan untuk validasi kalender yang benar
+    if (hour < 0 || hour > 23) return false;
+    if (minute < 0 || minute > 59) return false;
+
+    // Buat struct tm untuk deadline
+    std::tm tmDeadline = {};
+    tmDeadline.tm_year = year - 1900;
+    tmDeadline.tm_mon = month - 1;
+    tmDeadline.tm_mday = day;
+    tmDeadline.tm_hour = hour;
+    tmDeadline.tm_min = minute;
+    tmDeadline.tm_sec = 0;
+
+    std::time_t deadlineTime = std::mktime(&tmDeadline);
+    if (deadlineTime == -1) return false;
+
+    std::time_t now = std::time(nullptr);
+    if (deadlineTime < now) {
+        std::cout << "Deadline tidak boleh lebih lampau dari waktu sekarang.\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool isValidKunciJawaban(const string& input) {
+    return input == "A" || input == "B" || input == "C" || input == "D" ||
+           input == "a" || input == "b" || input == "c" || input == "d";
+}
+
 void tambahTugas() {
     string idMateri, deadline;
     int jumlahSoal;
 
     cout << "Masukkan ID materi (contoh: 4.1.1): ";
     cin >> idMateri;
+    cin.ignore(); 
 
     if (!isValidId(db["daftar_mata_pelajaran"], idMateri)) {
         cout << "ID materi tidak ditemukan.\n";
@@ -110,9 +197,14 @@ void tambahTugas() {
         parentId = idMateri.substr(0, pos);
     }
 
-    cin.ignore();
-    cout << "Masukkan deadline (format: YYYY-MM-DD HH:MM): ";
-    getline(cin, deadline);
+    do {
+        cout << "Masukkan deadline (format: YYYY-MM-DD HH:MM): ";
+        getline(cin, deadline);
+
+        if (!isValidDeadlineFormat(deadline)) {
+            cout << "Format deadline tidak valid. Harap gunakan format yang benar.\n";
+        }
+    } while (!isValidDeadlineFormat(deadline));
 
     cout << "Masukkan jumlah soal: ";
     cin >> jumlahSoal;
@@ -128,13 +220,26 @@ void tambahTugas() {
 
         cout << "Masukkan 4 opsi (pisahkan dengan enter):\n";
         for (int j = 0; j < 4; ++j) {
-            cout << "Opsi " << (char)('A' + j) << ": ";
-            getline(cin, opsi);
+            do {
+                cout << "Opsi " << (char)('A' + j) << ": ";
+                getline(cin, opsi);
+                if (opsi.empty()) {
+                    cout << "Opsi tidak boleh kosong. Silakan masukkan lagi.\n";
+                }
+            } while (opsi.empty());
+
             opsiList.push_back(opsi);
         }
 
-        cout << "Kunci jawaban (A/B/C/D): ";
-        getline(cin, kunci);
+        do {
+            cout << "Kunci jawaban (A/B/C/D): ";
+            getline(cin, kunci);
+
+            if (!isValidKunciJawaban(kunci)) {
+                cout << "Input tidak valid. Masukkan hanya A, B, C, atau D.\n";
+            }
+        } while (!isValidKunciJawaban(kunci));
+
 
         json soal = {
             {"pertanyaan", pertanyaan},
@@ -163,18 +268,35 @@ void tampilkanSemuaTugasUntukUser(int user_id) {
     for (size_t i = 0; i < db["tugas"].size(); ++i) {
         const auto &tugas = db["tugas"][i];
         string parentId = tugas["parent_id"];
-        if (idTerkaitDenganUser(db["daftar_mata_pelajaran"], parentId, mataUser)) {
-            cout << "\nTugas #" << i + 1 << endl;
-            cout << "ID Materi: " << tugas["id_materi"] << endl;
-            printPathById(db["daftar_mata_pelajaran"], tugas["id_materi"]);
-            cout << "Deadline: " << tugas["deadline"] << endl;
-            cout << "Jumlah Soal: " << tugas["soal"].size() << endl;
-            ditemukan = true;
+
+        // Lewati jika tidak relevan dengan mata pelajaran user
+        if (!idTerkaitDenganUser(db["daftar_mata_pelajaran"], parentId, mataUser)) {
+            continue;
         }
+
+        // Cek apakah user sudah mengerjakan tugas ini
+        bool sudahDikerjakan = false;
+        for (const auto& j : db["jawaban"]) {
+            if (j["user_id"] == user_id && j["id_tugas"] == i) {
+                sudahDikerjakan = true;
+                break;
+            }
+        }
+
+        // Lewati jika sudah dikerjakan
+        if (sudahDikerjakan) continue;
+
+        // Tampilkan tugas
+        cout << "\nTugas #" << i + 1 << endl;
+        cout << "ID Materi: " << tugas["id_materi"] << endl;
+        printPathById(db["daftar_mata_pelajaran"], tugas["id_materi"]);
+        cout << "Deadline: " << tugas["deadline"] << endl;
+        cout << "Jumlah Soal: " << tugas["soal"].size() << endl;
+        ditemukan = true;
     }
 
     if (!ditemukan) {
-        cout << "Tidak ada tugas yang relevan dengan mata pelajaran Anda.\n";
+        cout << "Tidak ada tugas yang relevan atau semua sudah Anda kerjakan.\n";
     }
 }
 
@@ -245,19 +367,33 @@ void kerjakanTugas() {
     int user_id = db["session"]["user_id"];
     vector<int> mataUser = getMataPelajaranUser(user_id);
 
-    // Cari semua tugas relevan
+    // Cari semua tugas relevan dan belum dikerjakan
     vector<int> tugasRelevanIndex;
     for (size_t i = 0; i < db["tugas"].size(); ++i) {
-        const auto &tugas = db["tugas"][i];
+        const auto& tugas = db["tugas"][i];
         string parentId = tugas["parent_id"];
-        if (idTerkaitDenganUser(db["daftar_mata_pelajaran"], parentId, mataUser)) {
+
+        // Cek keterkaitan dengan mata pelajaran user
+        if (!idTerkaitDenganUser(db["daftar_mata_pelajaran"], parentId, mataUser))
+            continue;
+
+        // Cek apakah user sudah mengerjakan tugas ini
+        bool sudahDikerjakan = false;
+        for (const auto& jawaban : db["jawaban"]) {
+            if (jawaban["user_id"] == user_id && jawaban["id_tugas"] == i) {
+                sudahDikerjakan = true;
+                break;
+            }
+        }
+
+        if (!sudahDikerjakan) {
             tugasRelevanIndex.push_back(i);
         }
     }
 
     // Jika tidak ada tugas yang sesuai
     if (tugasRelevanIndex.empty()) {
-        cout << "Tidak ada tugas yang relevan dengan mata pelajaran Anda.\n";
+        cout << "Tidak ada tugas yang relevan atau semua sudah Anda kerjakan.\n";
         return;
     }
 
@@ -265,7 +401,7 @@ void kerjakanTugas() {
     cout << "\n=== Daftar Tugas ===\n";
     for (size_t i = 0; i < tugasRelevanIndex.size(); ++i) {
         int idx = tugasRelevanIndex[i];
-        const auto &tugas = db["tugas"][idx];
+        const auto& tugas = db["tugas"][idx];
         cout << i + 1 << ". Materi: ";
         printPathById(db["daftar_mata_pelajaran"], tugas["id_materi"]);
         cout << "   Deadline: " << tugas["deadline"] << endl;
@@ -282,21 +418,26 @@ void kerjakanTugas() {
     }
 
     int tugasIndex = tugasRelevanIndex[pilihan - 1];
-    const auto &tugas = db["tugas"][tugasIndex];
-    const auto &soalList = tugas["soal"];
+    const auto& tugas = db["tugas"][tugasIndex];
+    const auto& soalList = tugas["soal"];
     int benar = 0;
     vector<string> jawabanUser;
 
     for (size_t i = 0; i < soalList.size(); ++i) {
         cout << "\nSoal #" << i + 1 << ": " << soalList[i]["pertanyaan"] << endl;
-        const auto &opsi = soalList[i]["opsi"];
+        const auto& opsi = soalList[i]["opsi"];
         for (size_t j = 0; j < opsi.size(); ++j) {
             cout << (char)('A' + j) << ". " << opsi[j] << endl;
         }
 
         string jawaban;
-        cout << "Jawaban Anda (A/B/C/D): ";
-        getline(cin, jawaban);
+        do {
+            cout << "Jawaban Anda (A/B/C/D): ";
+            getline(cin, jawaban);
+            if (!isValidKunciJawaban(jawaban)) {
+                cout << "Input tidak valid. Masukkan hanya A, B, C, atau D.\n";
+            }
+        } while (!isValidKunciJawaban(jawaban));
 
         if (!jawaban.empty()) {
             jawabanUser.push_back(string(1, toupper(jawaban[0])));
@@ -323,6 +464,138 @@ void kerjakanTugas() {
     cout << "Jawaban dan nilai disimpan.\n";
 }
 
+void antriTugas() {
+    resetQueue();
+
+    if (!db.contains("tugas") || db["tugas"].empty()) {
+        cout << "Belum ada tugas.\n";
+        return;
+    }
+
+    int user_id = db["session"]["user_id"];
+    vector<int> mataUser = getMataPelajaranUser(user_id);
+
+    // Simpan index tugas dan deadline untuk disortir
+    vector<pair<int, string>> tugasRelevan;
+
+    for (size_t i = 0; i < db["tugas"].size(); ++i) {
+        const auto& tugas = db["tugas"][i];
+        string parentId = tugas["parent_id"];
+
+        if (!idTerkaitDenganUser(db["daftar_mata_pelajaran"], parentId, mataUser))
+            continue;
+
+        bool sudahDikerjakan = false;
+        for (const auto& j : db["jawaban"]) {
+            if (j["user_id"] == user_id && j["id_tugas"] == i) {
+                sudahDikerjakan = true;
+                break;
+            }
+        }
+
+        if (!sudahDikerjakan) {
+            tugasRelevan.emplace_back(i, tugas["deadline"]);
+        }
+    }
+
+    // Urutkan berdasarkan deadline (ascending)
+    sort(tugasRelevan.begin(), tugasRelevan.end(), [](const auto& a, const auto& b) {
+        return a.second < b.second;
+    });
+
+    // Masukkan ke antrian sesuai urutan deadline
+    for (const auto& tugas : tugasRelevan) {
+        enqueue(tugas.first, MAX_QUEUE);
+    }
+
+    if (isEmpty()) {
+        cout << "Tidak ada tugas yang relevan untuk diantrikan.\n";
+        return;
+    }
+
+    cout << "\nTugas-tugas telah dimasukkan ke dalam antrian berdasarkan *deadline*.\n";
+    cout << "Total antrian: " << queueSize << "\n";
+
+    int count = 1;
+    for (int i = frontQueue; i <= rearQueue; ++i) {
+        int idx = queue[i];
+        const auto& tugas = db["tugas"][idx];
+        cout << count++ << ". Materi: ";
+        printPathById(db["daftar_mata_pelajaran"], tugas["id_materi"]);
+        cout << "   Deadline: " << tugas["deadline"] << "\n";
+    }
+}
+
+bool isValidKunciJawaban(const string& jawaban, const json& opsi) {
+    if (jawaban.length() != 1) return false;
+    char ch = toupper(jawaban[0]);
+    int index = ch - 'A';
+    return ch >= 'A' && ch <= 'D' && index < opsi.size() && !opsi[index].get<string>().empty();
+}
+
+void prosesAntrianTugas() {
+    if (isEmpty()) {
+        cout << "Antrian kosong. Tambahkan tugas ke antrian terlebih dahulu.\n";
+        return;
+    }
+
+    int user_id = db["session"]["user_id"];
+
+    cin.ignore();
+    while (!isEmpty()) {
+        int tugasIndex = dequeue();
+        const auto& tugas = db["tugas"][tugasIndex];
+        const auto& soalList = tugas["soal"];
+        int benar = 0;
+        vector<string> jawabanUser;
+
+        cout << "\n--- Mengerjakan Tugas ---\n";
+        cout << "Materi: ";
+        printPathById(db["daftar_mata_pelajaran"], tugas["id_materi"]);
+        cout << "Deadline: " << tugas["deadline"] << endl;
+
+        for (size_t i = 0; i < soalList.size(); ++i) {
+            cout << "\nSoal #" << i + 1 << ": " << soalList[i]["pertanyaan"] << endl;
+            const auto& opsi = soalList[i]["opsi"];
+            for (size_t j = 0; j < opsi.size(); ++j) {
+                cout << (char)('A' + j) << ". " << opsi[j] << endl;
+            }
+
+            string jawaban;
+            do {
+                cout << "Jawaban Anda (A/B/C/D): ";
+                getline(cin, jawaban);
+                if (!isValidKunciJawaban(jawaban, opsi)) {
+                    cout << "Input tidak valid.\n";
+                }
+            } while (!isValidKunciJawaban(jawaban, opsi));
+
+            char jawabanChar = toupper(jawaban[0]);
+            jawabanUser.push_back(string(1, jawabanChar));
+
+            if (jawabanChar == toupper(soalList[i]["kunci"].get<string>()[0])) {
+                benar++;
+            }
+        }
+
+        double nilai = (double)benar / soalList.size() * 100.0;
+        cout << "\nTugas selesai! Nilai: " << fixed << setprecision(2) << nilai << "\n";
+
+        json jawabanData = {
+            {"user_id", user_id},
+            {"id_tugas", tugasIndex},
+            {"jawaban", jawabanUser},
+            {"nilai", nilai}
+        };
+
+        db["jawaban"].push_back(jawabanData);
+        saveDatabase("database.json");
+        cout << "Jawaban disimpan.\n";
+    }
+
+    cout << "\nSeluruh tugas dalam antrian telah selesai.\n";
+}
+
 int main() {
     const string filename = "database.json";
     if (!loadDatabase(filename)) return 1;
@@ -337,17 +610,25 @@ int main() {
             cout << "1. Tambah Tugas\n";
             cout << "2. Lihat Semua Tugas\n";
             cout << "3. Lihat Detail Tugas\n";
-            cout << "4. Tampilkan Semua Materi\n";
+            cout << "4. Tampilkan Semua Judul Materi dan SubMateri\n";
             cout << "5. Simpan dan Keluar\n";
         } else {
             cout << "1. Lihat Semua Tugas\n";
-            cout << "2. Tampilkan Semua Materi\n";
+            cout << "2. Tampilkan Semua Judul Materi dan SubMateri\n";
             cout << "3. Kerjakan Tugas\n";
-            cout << "4. Keluar\n";
+            cout << "4. Fitur antri Tugas\n";
+            cout << "5. Keluar\n";
         }
 
         cout << "Pilih: ";
         cin >> pilihan;
+
+        if (cin.fail()) {
+            cin.clear(); // hapus flag kesalahan
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // buang input buffer sampai baris baru
+            cout << "Input tidak valid. Harap masukkan angka.\n";
+            pilihan = -1; // memicu default case
+        }
 
         if (role == "admin") {
             switch (pilihan) {
@@ -363,12 +644,16 @@ int main() {
                 case 1: tampilkanSemuaTugasUntukUser(db["session"]["user_id"]); break;
                 case 2: tampilkanDaftarMateri(db["daftar_mata_pelajaran"]); break;
                 case 3: kerjakanTugas(); break;
-                case 4: cout << "Keluar...\n"; break;
+                case 4: 
+                    antriTugas();
+                    prosesAntrianTugas(); 
+                    break;
+                case 5: cout << "Keluar...\n"; break;
                 default: cout << "Pilihan tidak valid.\n";
             }
         }
 
-    } while ((role == "admin" && pilihan != 5) || (role != "admin" && pilihan != 4));
+    } while ((role == "admin" && pilihan != 5) || (role != "admin" && pilihan != 5));
 
     return 0;
 }

@@ -148,6 +148,74 @@
                     "pertanyaan": "dd"
                 }
             ]
+        },
+        {
+            "deadline": "2025-12-12 12:00",
+            "id_materi": "4",
+            "parent_id": "4",
+            "soal": [
+                {
+                    "kunci": "D",
+                    "opsi": [
+                        "1234134___",
+                        "ss",
+                        "dd",
+                        "ff"
+                    ],
+                    "pertanyaan": "mahesaasd"
+                }
+            ]
+        },
+        {
+            "deadline": "2025-12-12 12:00",
+            "id_materi": "4",
+            "parent_id": "4",
+            "soal": [
+                {
+                    "kunci": "A",
+                    "opsi": [
+                        "sdffd",
+                        "asdf",
+                        "cssdcds",
+                        "fasf"
+                    ],
+                    "pertanyaan": "fs"
+                }
+            ]
+        },
+        {
+            "deadline": "2025-11-11 12:00",
+            "id_materi": "7",
+            "parent_id": "7",
+            "soal": [
+                {
+                    "kunci": "C",
+                    "opsi": [
+                        "jokowi",
+                        "naruto",
+                        "prabowo",
+                        "ardito"
+                    ],
+                    "pertanyaan": "apakah nama presiden sekarang"
+                }
+            ]
+        },
+        {
+            "deadline": "2025-10-12 12:00",
+            "id_materi": "5",
+            "parent_id": "5",
+            "soal": [
+                {
+                    "kunci": "A",
+                    "opsi": [
+                        "iya",
+                        "engga",
+                        "yaa",
+                        "tidak"
+                    ],
+                    "pertanyaan": "apa kah kamu single "
+                }
+            ]
         }
     ],
     "users": [
@@ -188,7 +256,10 @@
             "mata_pelajaran": [
                 1,
                 2,
-                3
+                3,
+                4,
+                7,
+                8
             ],
             "name": "admin12",
             "password": "3",
