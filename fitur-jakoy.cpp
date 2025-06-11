@@ -41,7 +41,6 @@ void loadProfilesFromJson(const string& filename) {
     file >> data;
     file.close();
 
-    // Load session jika ada
     if (data.contains("session") && !data["session"].is_null()) {
         currentSession.username = data["session"]["username"];
         currentSession.role = data["session"]["role"];
@@ -69,7 +68,6 @@ void loadProfilesFromJson(const string& filename) {
     nextProfileId = maxId + 1;
 }
 
-
 void saveProfilesToJson(const string& filename) {
     json data;
     ifstream inFile(filename);
@@ -79,7 +77,7 @@ void saveProfilesToJson(const string& filename) {
     } else {
         data = {
             {"users", json::array()},
-            {"matakuliah", json::array()},
+            {"mata_pelajaran", json::array()},
             {"tugas", json::array()},
             {"jawaban", json::array()},
             {"daftar_mata_pelajaran", json::array()},
@@ -87,7 +85,6 @@ void saveProfilesToJson(const string& filename) {
         };
     }
 
-    // Simpan session jika user logged in
     if (currentSession.isLoggedIn) {
         data["session"] = {
             {"username", currentSession.username},
@@ -108,21 +105,19 @@ void saveProfilesToJson(const string& filename) {
     if (outFile.is_open()) {
         outFile << data.dump(4);
         outFile.close();
-        cout << "📁 Data berhasil disimpan.\n";
+        cout << "Data berhasil disimpan.\n";
     } else {
-        cout << "❌ Gagal menyimpan ke file.\n";
+        cout << "Gagal menyimpan ke file.\n";
     }
 }
 
 void tampilkanDaftarProfile() {
     if (!profileHead) {
-        cout << "📭 Tidak ada profile yang terdaftar.\n";
+        cout << "Tidak ada profile yang terdaftar.\n";
         return;
     }
 
-    cout << "\n📋 DAFTAR PROFILE TERDAFTAR\n\n";
-    
-    // Header tabel
+    cout << "\nDAFTAR PROFILE TERDAFTAR\n\n";
     cout << "+----+----------------------+----------------------+----------------------+----------+\n";
     cout << "| " << left << setw(2) << "ID" << " | " 
          << setw(20) << "Username" << " | " 
@@ -130,8 +125,7 @@ void tampilkanDaftarProfile() {
          << setw(20) << "Email" << " | " 
          << setw(8) << "Role" << " |\n";
     cout << "+----+----------------------+----------------------+----------------------+----------+\n";
-    
-    // Isi tabel
+
     ProfileNode* current = profileHead;
     while (current) {
         json profile = current->profile.profileJson;
@@ -142,11 +136,8 @@ void tampilkanDaftarProfile() {
              << setw(8) << profile["role"] << " |\n";
         current = current->next;
     }
-    
-    // Footer tabel
+
     cout << "+----+----------------------+----------------------+----------------------+----------+\n";
-    
-    // Hitung jumlah profile
     int count = 0;
     current = profileHead;
     while (current) {
@@ -156,11 +147,11 @@ void tampilkanDaftarProfile() {
     cout << "Total profile: " << count << endl;
 }
 
-void tambahProfileBaru(string username, string namaLengkap, string email, string role = "user") {
+void tambahProfileBaru(string username, string namaLengkap, string email, string password, string phone, string role = "user") {
     ProfileNode* current = profileHead;
     while (current) {
         if (current->profile.profileJson["username"] == username) {
-            cout << "⚠️  Username sudah terdaftar.\n";
+            cout << "Username sudah terdaftar.\n";
             return;
         }
         current = current->next;
@@ -172,9 +163,9 @@ void tambahProfileBaru(string username, string namaLengkap, string email, string
         {"name", namaLengkap},
         {"email", email},
         {"role", role},
-        {"matakuliah", json::array()},
-        {"password", ""},
-        {"phone", ""}
+        {"mata_pelajaran", json::array()},
+        {"password", password},
+        {"phone", phone}
     };
 
     ProfileNode* newProfileNode = new ProfileNode{{newProfile}, nullptr};
@@ -186,27 +177,24 @@ void tambahProfileBaru(string username, string namaLengkap, string email, string
         current->next = newProfileNode;
     }
 
-    cout << "✅ Profile berhasil ditambahkan!\n";
+    cout << "Profile berhasil ditambahkan!\n";
 }
 
-void hapusProfile(string username) {
+void editProfile(string username, string namaBaru, string emailBaru, string phoneBaru, string passwordBaru) {
     ProfileNode* current = profileHead;
-    ProfileNode* prev = nullptr;
-
     while (current) {
         if (current->profile.profileJson["username"] == username) {
-            if (!prev) profileHead = current->next;
-            else prev->next = current->next;
+            if (!namaBaru.empty()) current->profile.profileJson["name"] = namaBaru;
+            if (!emailBaru.empty()) current->profile.profileJson["email"] = emailBaru;
+            if (!phoneBaru.empty()) current->profile.profileJson["phone"] = phoneBaru;
+            if (!passwordBaru.empty()) current->profile.profileJson["password"] = passwordBaru;
 
-            delete current;
-            cout << "🗑️  Profile berhasil dihapus.\n";
+            cout << "Profile berhasil diperbarui!\n";
             return;
         }
-        prev = current;
         current = current->next;
     }
-
-    cout << "⚠️  Profile tidak ditemukan.\n";
+    cout << "Profile tidak ditemukan.\n";
 }
 
 void lihatDetailProfile(string username) {
@@ -217,30 +205,45 @@ void lihatDetailProfile(string username) {
             cout << "Username     : " << current->profile.profileJson["username"] << endl;
             cout << "Nama Lengkap : " << current->profile.profileJson["name"] << endl;
             cout << "Email        : " << current->profile.profileJson["email"] << endl;
+            cout << "No. Telepon  : " << current->profile.profileJson["phone"] << endl;
             cout << "Role         : " << current->profile.profileJson["role"] << endl;
+
+            if (current->profile.profileJson.contains("mata_pelajaran")) {
+                cout << "Mata Pelajaran: ";
+                for (const auto& m : current->profile.profileJson["mata_pelajaran"]) {
+                    cout << m << ", ";
+                }
+                cout << endl;
+            }
             return;
         }
         current = current->next;
     }
-    cout << "⚠️  Profile tidak ditemukan.\n";
+    cout << "Profile tidak ditemukan.\n";
 }
 
-void tampilkanProfileMenu() {
-    if (isAdmin()) {
-        cout << "\n=== MENU MANAJEMEN PROFILE (ADMIN) ===\n";
-        cout << "1. Tambah Profile\n";
-        cout << "2. Hapus Profile\n";
-        cout << "3. Lihat Detail Profile\n";
-        cout << "4. Tampilkan Daftar Profile\n";
-        cout << "5. Kembali ke Menu Utama\n";
-        cout << "Pilih opsi (1-5): ";
-    } else {
-        // Untuk non-admin, langsung tampilkan detail profile mereka
-        lihatDetailProfile(currentSession.username);
-        cout << "\nTekan enter untuk kembali...";
-        cin.ignore();
-        return;
+void hapusProfile(const string& username) {
+    ProfileNode* current = profileHead;
+    ProfileNode* previous = nullptr;
+
+    while (current) {
+        if (current->profile.profileJson["username"] == username) {
+            if (previous) {
+                previous->next = current->next;
+            } else {
+                profileHead = current->next;
+            }
+
+            delete current;
+            cout << "Profile berhasil dihapus.\n";
+            return;
+        }
+
+        previous = current;
+        current = current->next;
     }
+
+    cout << "Profile dengan username '" << username << "' tidak ditemukan.\n";
 }
 
 // ==== TAMBAHAN: EKSTERNAL fungsi tambahHistori() ====
@@ -250,7 +253,6 @@ int mainProfile() {
     const string jsonFile = "database.json";
     loadProfilesFromJson(jsonFile);
 
-    // Jika bukan admin, langsung tampilkan profile dan kembali
     if (!isAdmin()) {
         lihatDetailProfile(currentSession.username);
         cout << "\nTekan enter untuk kembali...";
@@ -260,29 +262,31 @@ int mainProfile() {
         return 0;
     }
 
-    // Hanya admin yang bisa mengakses menu manajemen profile
     int pilihan;
-    string username, namaLengkap, email;
+    string username, namaLengkap, email, password, phone;
 
     do {
-        tampilkanProfileMenu();
-        
-        // Jika bukan admin, fungsi akan kembali setelah menampilkan profile
-        if (!isAdmin()) break;
-        
+        cout << "\n=== MENU MANAJEMEN PROFILE (ADMIN) ===\n";
+        cout << "1. Tambah Profile\n";
+        cout << "2. Hapus Profile\n";
+        cout << "3. Lihat Detail Profile\n";
+        cout << "4. Tampilkan Daftar Profile\n";
+        cout << "5. Edit Profile\n";
+        cout << "6. Kembali ke Menu Utama\n";
+        cout << "Pilih opsi (1-6): ";
+
         cin >> pilihan;
         cin.ignore();
 
         switch (pilihan) {
             case 1:
                 cout << "\n== Tambah Profile ==\n";
-                cout << "Username     : ";
-                getline(cin, username);
-                cout << "Nama Lengkap : ";
-                getline(cin, namaLengkap);
-                cout << "Email        : ";
-                getline(cin, email);
-                tambahProfileBaru(username, namaLengkap, email);
+                cout << "Username     : "; getline(cin, username);
+                cout << "Nama Lengkap : "; getline(cin, namaLengkap);
+                cout << "Email        : "; getline(cin, email);
+                cout << "Password     : "; getline(cin, password);
+                cout << "No. Telepon  : "; getline(cin, phone);
+                tambahProfileBaru(username, namaLengkap, email, password, phone);
                 saveProfilesToJson(jsonFile);
                 break;
 
@@ -300,22 +304,33 @@ int mainProfile() {
                 getline(cin, username);
                 lihatDetailProfile(username);
                 break;
-                
+
             case 4:
                 tampilkanDaftarProfile();
                 break;
 
             case 5:
+                cout << "\n== Edit Profile ==\n";
+                cout << "Masukkan username yang ingin diedit: "; getline(cin, username);
+                cout << "Nama Baru     : "; getline(cin, namaLengkap);
+                cout << "Email Baru    : "; getline(cin, email);
+                cout << "No. Telepon   : "; getline(cin, phone);
+                cout << "Password Baru : "; getline(cin, password);
+                editProfile(username, namaLengkap, email, phone, password);
+                saveProfilesToJson(jsonFile);
+                break;
+
+            case 6:
                 cout << "Kembali ke menu utama...\n";
                 break;
 
             default:
-                cout << "❌ Pilihan tidak valid. Silakan pilih 1-5.\n";
+                cout << "Pilihan tidak valid. Silakan pilih 1-6.\n";
         }
         // ==== TAMBAHAN: Tambah histori saat masuk menu ini (ADMIN) ====
         tambahHistori("Mengelola Profil");
 
-    } while (pilihan != 5 && isAdmin());
+    } while (pilihan != 6 && isAdmin());
 
     return 0;
 }

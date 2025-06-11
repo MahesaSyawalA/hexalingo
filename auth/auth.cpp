@@ -454,7 +454,7 @@ void Auth::loginUser()
     // Loop mencari user yang cocok
     for (const JsonUser &user : users)
     {
-        cout << "Memeriksa user: " << user.username << " dengan password: " << user.password << endl;
+        // cout << "Memeriksa user: " << user.username << " dengan password: " << user.password << endl;
  // Menampilkan username yang sedang diperiksa
 
         // Periksa apakah username dan password cocok
