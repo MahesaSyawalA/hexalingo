@@ -241,8 +241,9 @@ int main() {
         if (role == "admin") {
             cout << "1. Tambah Tugas\n";
             cout << "2. Lihat Semua Tugas\n";
-            cout << "3. Tampilkan Semua Materi\n";
-            cout << "4. Simpan dan Keluar\n";
+            cout << "3. Lihat Detail Tugas\n";
+            cout << "4. Tampilkan Semua Materi\n";
+            cout << "5. Simpan dan Keluar\n";
         } else {
             cout << "1. Lihat Semua Tugas\n";
             cout << "2. Tampilkan Semua Materi\n";
@@ -276,7 +277,7 @@ int main() {
         }
 }
 
-    } while ((role == "admin" && pilihan != 5) || (role != "admin" && pilihan != 4));
+    } while ((role == "admin" && pilihan != 5) || (role != "admin" && pilihan != 5));
 
     return 0;
 }
