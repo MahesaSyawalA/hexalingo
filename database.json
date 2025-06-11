@@ -98,54 +98,37 @@
             ],
             "nilai": 50.0,
             "user_id": 3
+        },
+        {
+            "id_tugas": 0,
+            "jawaban": [
+                "D"
+            ],
+            "nilai": 100.0,
+            "user_id": 3
         }
     ],
     "session": {
         "nama": "admin12",
-        "role": "admin",
+        "role": "user",
         "user_id": 3,
         "username": "3"
     },
     "tugas": [
         {
             "deadline": "2025-12-12 12:00",
-            "id_materi": "4.1.1",
+            "id_materi": "7.1.1",
+            "parent_id": "7",
             "soal": [
                 {
                     "kunci": "D",
                     "opsi": [
-                        "a",
-                        "d",
-                        "t",
-                        "g"
+                        "s",
+                        "dg",
+                        "cx",
+                        "d"
                     ],
-                    "pertanyaan": "dfasdf"
-                },
-                {
-                    "kunci": "D",
-                    "opsi": [
-                        "d",
-                        "dfg",
-                        "g",
-                        "c"
-                    ],
-                    "pertanyaan": "dfafa"
-                }
-            ]
-        },
-        {
-            "deadline": "2025-12-12 01:00",
-            "id_materi": "4",
-            "soal": [
-                {
-                    "kunci": "C",
-                    "opsi": [
-                        "a",
-                        "a",
-                        "a",
-                        "a"
-                    ],
-                    "pertanyaan": "test"
+                    "pertanyaan": "dd"
                 }
             ]
         }
@@ -173,7 +156,8 @@
             "mata_pelajaran": [
                 1,
                 2,
-                3
+                3,
+                7
             ],
             "name": "Rina Oktavia",
             "password": "2",

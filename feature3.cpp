@@ -30,6 +30,30 @@ bool saveDatabase(const string &filename) {
     return true;
 }
 
+vector<int> getMataPelajaranUser(int user_id) {
+    for (const auto &user : db["users"]) {
+        if (user["id"] == user_id) {
+            return user["mata_pelajaran"].get<vector<int>>();
+        }
+    }
+    return {};
+}
+
+bool idTerkaitDenganUser(const json &materiList, const string &targetId, const vector<int> &mataUser) {
+    for (const auto &materi : materiList) {
+        if (!materi.contains("id")) continue;
+        string id = materi["id"];
+        if (targetId == id && materi.contains("judul")) {
+            int idUtama = stoi(id.substr(0, id.find('.')));
+            return find(mataUser.begin(), mataUser.end(), idUtama) != mataUser.end();
+        }
+        if (materi.contains("submateri") && idTerkaitDenganUser(materi["submateri"], targetId, mataUser)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void printPathById(const json &materiList, const string &targetId, string currentPath = "") {
     for (const auto &materi : materiList) {
         if (!materi.contains("id")) continue;
@@ -57,15 +81,33 @@ bool isValidId(const json &materiList, const string &targetId) {
     return false;
 }
 
+void tampilkanDaftarMateri(const json &materiList, int indent = 0) {
+    string spasi(indent * 2, ' ');
+    for (const auto &materi : materiList) {
+        if (!materi.contains("id") || !materi.contains("judul")) continue;
+        cout << spasi << "[" << materi["id"] << "] " << materi["judul"] << "\n";
+        if (materi.contains("submateri")) {
+            tampilkanDaftarMateri(materi["submateri"], indent + 1);
+        }
+    }
+}
+
 void tambahTugas() {
     string idMateri, deadline;
     int jumlahSoal;
+
     cout << "Masukkan ID materi (contoh: 4.1.1): ";
     cin >> idMateri;
 
     if (!isValidId(db["daftar_mata_pelajaran"], idMateri)) {
         cout << "ID materi tidak ditemukan.\n";
         return;
+    }
+
+    string parentId = idMateri;
+    size_t pos = idMateri.find('.');
+    if (pos != string::npos) {
+        parentId = idMateri.substr(0, pos);
     }
 
     cin.ignore();
@@ -104,6 +146,7 @@ void tambahTugas() {
 
     json tugas = {
         {"id_materi", idMateri},
+        {"parent_id", parentId},
         {"deadline", deadline},
         {"soal", soalList}
     };
@@ -111,6 +154,28 @@ void tambahTugas() {
     db["tugas"].push_back(tugas);
     cout << "Tugas berhasil ditambahkan!\n";
     printPathById(db["daftar_mata_pelajaran"], idMateri);
+}
+
+void tampilkanSemuaTugasUntukUser(int user_id) {
+    vector<int> mataUser = getMataPelajaranUser(user_id);
+    bool ditemukan = false;
+
+    for (size_t i = 0; i < db["tugas"].size(); ++i) {
+        const auto &tugas = db["tugas"][i];
+        string parentId = tugas["parent_id"];
+        if (idTerkaitDenganUser(db["daftar_mata_pelajaran"], parentId, mataUser)) {
+            cout << "\nTugas #" << i + 1 << endl;
+            cout << "ID Materi: " << tugas["id_materi"] << endl;
+            printPathById(db["daftar_mata_pelajaran"], tugas["id_materi"]);
+            cout << "Deadline: " << tugas["deadline"] << endl;
+            cout << "Jumlah Soal: " << tugas["soal"].size() << endl;
+            ditemukan = true;
+        }
+    }
+
+    if (!ditemukan) {
+        cout << "Tidak ada tugas yang relevan dengan mata pelajaran Anda.\n";
+    }
 }
 
 void tampilkanSemuaTugas() {
@@ -134,43 +199,16 @@ void tampilkanDetailTugas() {
         return;
     }
 
+    cout << "\n=== Daftar Tugas ===\n";
     for (size_t i = 0; i < db["tugas"].size(); ++i) {
-        cout << "\n=== Detail Tugas #" << i + 1 << " ===\n";
-        printPathById(db["daftar_mata_pelajaran"], db["tugas"][i]["id_materi"]);
-        cout << "Deadline: " << db["tugas"][i]["deadline"] << "\n";
-        const auto &soalList = db["tugas"][i]["soal"];
-        for (size_t j = 0; j < soalList.size(); ++j) {
-            cout << "\nSoal #" << j + 1 << ": " << soalList[j]["pertanyaan"] << endl;
-            const auto &opsi = soalList[j]["opsi"];
-            for (size_t k = 0; k < opsi.size(); ++k) {
-                cout << (char)('A' + k) << ". " << opsi[k] << endl;
-            }
-            cout << "Kunci Jawaban: " << soalList[j]["kunci"] << endl;
-        }
+        string idMateri = db["tugas"][i]["id_materi"];
+        cout << i + 1 << ". Materi: ";
+        printPathById(db["daftar_mata_pelajaran"], idMateri);
+        cout << "   Deadline: " << db["tugas"][i]["deadline"] << endl;
     }
-}
-
-void tampilkanDaftarMateri(const json &materiList, int indent = 0) {
-    string spasi(indent * 2, ' ');
-    for (const auto &materi : materiList) {
-        if (!materi.contains("id") || !materi.contains("judul")) continue;
-        cout << spasi << "[" << materi["id"] << "] " << materi["judul"] << "\n";
-        if (materi.contains("submateri")) {
-            tampilkanDaftarMateri(materi["submateri"], indent + 1);
-        }
-    }
-}
-
-void kerjakanTugas() {
-    if (!db.contains("tugas") || db["tugas"].empty()) {
-        cout << "Belum ada tugas yang tersedia.\n";
-        return;
-    }
-
-    tampilkanSemuaTugas();  // Tampilkan daftar tugas agar user bisa memilih
 
     int index;
-    cout << "\nPilih nomor tugas yang ingin dikerjakan: ";
+    cout << "\nPilih nomor tugas untuk melihat detail: ";
     cin >> index;
     cin.ignore();
 
@@ -182,6 +220,70 @@ void kerjakanTugas() {
     const auto &tugas = db["tugas"][index - 1];
     const auto &soalList = tugas["soal"];
 
+    cout << "\n=== Detail Tugas ===\n";
+    cout << "Materi: ";
+    printPathById(db["daftar_mata_pelajaran"], tugas["id_materi"]);
+    cout << "Deadline: " << tugas["deadline"] << "\n";
+    cout << "Jumlah Soal: " << soalList.size() << "\n";
+
+    for (size_t j = 0; j < soalList.size(); ++j) {
+        cout << "\nSoal #" << j + 1 << ": " << soalList[j]["pertanyaan"] << endl;
+        const auto &opsi = soalList[j]["opsi"];
+        for (size_t k = 0; k < opsi.size(); ++k) {
+            cout << (char)('A' + k) << ". " << opsi[k] << endl;
+        }
+        cout << "Kunci Jawaban: " << soalList[j]["kunci"] << endl;
+    }
+}
+
+void kerjakanTugas() {
+    if (!db.contains("tugas") || db["tugas"].empty()) {
+        cout << "Belum ada tugas yang tersedia.\n";
+        return;
+    }
+
+    int user_id = db["session"]["user_id"];
+    vector<int> mataUser = getMataPelajaranUser(user_id);
+
+    // Cari semua tugas relevan
+    vector<int> tugasRelevanIndex;
+    for (size_t i = 0; i < db["tugas"].size(); ++i) {
+        const auto &tugas = db["tugas"][i];
+        string parentId = tugas["parent_id"];
+        if (idTerkaitDenganUser(db["daftar_mata_pelajaran"], parentId, mataUser)) {
+            tugasRelevanIndex.push_back(i);
+        }
+    }
+
+    // Jika tidak ada tugas yang sesuai
+    if (tugasRelevanIndex.empty()) {
+        cout << "Tidak ada tugas yang relevan dengan mata pelajaran Anda.\n";
+        return;
+    }
+
+    // Tampilkan daftar tugas relevan
+    cout << "\n=== Daftar Tugas ===\n";
+    for (size_t i = 0; i < tugasRelevanIndex.size(); ++i) {
+        int idx = tugasRelevanIndex[i];
+        const auto &tugas = db["tugas"][idx];
+        cout << i + 1 << ". Materi: ";
+        printPathById(db["daftar_mata_pelajaran"], tugas["id_materi"]);
+        cout << "   Deadline: " << tugas["deadline"] << endl;
+    }
+
+    int pilihan;
+    cout << "\nPilih nomor tugas yang ingin dikerjakan: ";
+    cin >> pilihan;
+    cin.ignore();
+
+    if (pilihan < 1 || pilihan > tugasRelevanIndex.size()) {
+        cout << "Pilihan tidak valid.\n";
+        return;
+    }
+
+    int tugasIndex = tugasRelevanIndex[pilihan - 1];
+    const auto &tugas = db["tugas"][tugasIndex];
+    const auto &soalList = tugas["soal"];
     int benar = 0;
     vector<string> jawabanUser;
 
@@ -209,19 +311,12 @@ void kerjakanTugas() {
     double nilai = (double)benar / soalList.size() * 100.0;
     cout << "\nSelesai! Nilai akhir Anda: " << fixed << setprecision(2) << nilai << " dari " << soalList.size() << " soal.\n";
 
-    // Simpan ke database jawaban
-    int user_id = db["session"]["user_id"];
-
     json jawabanData = {
         {"user_id", user_id},
-        {"id_tugas", index - 1},  // index tugas ke berapa
+        {"id_tugas", tugasIndex},
         {"jawaban", jawabanUser},
         {"nilai", nilai}
     };
-
-    if (!db.contains("jawaban")) {
-        db["jawaban"] = json::array();
-    }
 
     db["jawaban"].push_back(jawabanData);
     saveDatabase("database.json");
@@ -256,11 +351,7 @@ int main() {
 
         if (role == "admin") {
             switch (pilihan) {
-                case 1:
-                    tampilkanDaftarMateri(db["daftar_mata_pelajaran"]);
-                    tambahTugas(); 
-                    saveDatabase(filename);
-                    break;
+                case 1: tampilkanDaftarMateri(db["daftar_mata_pelajaran"]); tambahTugas(); saveDatabase(filename); break;
                 case 2: tampilkanSemuaTugas(); break;
                 case 3: tampilkanDetailTugas(); break;
                 case 4: tampilkanDaftarMateri(db["daftar_mata_pelajaran"]); break;
@@ -269,15 +360,15 @@ int main() {
             }
         } else {
             switch (pilihan) {
-                case 1: tampilkanSemuaTugas(); break;
+                case 1: tampilkanSemuaTugasUntukUser(db["session"]["user_id"]); break;
                 case 2: tampilkanDaftarMateri(db["daftar_mata_pelajaran"]); break;
                 case 3: kerjakanTugas(); break;
                 case 4: cout << "Keluar...\n"; break;
                 default: cout << "Pilihan tidak valid.\n";
+            }
         }
-}
 
-    } while ((role == "admin" && pilihan != 5) || (role != "admin" && pilihan != 5));
+    } while ((role == "admin" && pilihan != 5) || (role != "admin" && pilihan != 4));
 
     return 0;
 }
