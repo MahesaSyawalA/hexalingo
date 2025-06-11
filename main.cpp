@@ -10,6 +10,7 @@ using json = nlohmann::json;
 #include "fitur.cpp"
 #include "feature3.cpp"
 #include "fitur-jakoy.cpp"
+#include "kontrak.cpp"
 
 using namespace std;
 
@@ -33,11 +34,7 @@ void showMainMenu()
 
 void showWelcomeMessage(User* user)
 {
-    // #ifdef _WIN32
-    // system("cls");
-    // #else
-    // system("clear");
-    // #endif
+    
 
     cout << "\n========================================\n";
     cout << "          Selamat Datang!\n";
@@ -52,6 +49,12 @@ void showWelcomeMessage(User* user)
 
 int main()
 {
+    #ifdef _WIN32
+    system("cls");
+    #else
+    system("clear");
+    #endif
+
     Auth auth;
     int choice;
 
@@ -102,8 +105,8 @@ int main()
                         adminMenu();
                         break;
                     case 3:
-                        mainKuis();
-                        return 0; 
+                        mainTugas();
+                        break; 
                     case 4:
                         auth.logout();
                         return 0; // Exit the program
@@ -122,9 +125,10 @@ int main()
                 cout << "Selamat data di Aplikasi Hexalingo\n";
                 cout << "1. Profil \n";
                 cout << "2. Matakuliah & Materi Pembelajaran \n";
-                cout << "3. Logout\n";
+                cout << "3. Kontrak Mata Kuliah\n";
                 cout << "4. Tugas Menu\n";
-                cout << "5. Exit (session tetap aktif)\n";
+                cout << "5. Logout\n";
+                cout << "6. Exit (session tetap aktif)\n";
                 cout << "========================================\n";
                 cout << "Pilihan: ";
 
@@ -141,12 +145,15 @@ int main()
                         userMenu();
                         break;
                     case 3:
-                        auth.logout();
-                        return 0; // Exit the program
+                        mainKontrak();
+                        break;
                     case 4:
-                        mainKuis();
-                        return 0;
+                        mainTugas();
+                        break; // Exit the program
                     case 5:
+                        auth.logout();
+                        return 0;
+                    case 6:
                         return 0; // Exit the program
                     default:
                         cout << "Pilihan tidak valid. Logout otomatis...\n";
