@@ -455,7 +455,7 @@ void hapusKontrakMapel(const json &materiList, int user_id) {
     }
 }
 
-int main() {
+int mainTugas() {
     const string filename = "database.json";
     if (!loadDatabase(filename)) return 1;
 

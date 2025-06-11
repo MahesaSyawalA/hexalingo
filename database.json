@@ -134,9 +134,9 @@
         }
     ],
     "session": {
-        "user_id": 5,
         "nama": "asdfad",
         "role": "user",
+        "user_id": 5,
         "username": "jujuju"
     },
     "tugas": [
@@ -219,7 +219,10 @@
         {
             "email": "asdfasd",
             "id": 5,
-            "mata_pelajaran": [],
+            "mata_pelajaran": [
+                1,
+                4
+            ],
             "name": "asdfad",
             "password": "",
             "phone": "",

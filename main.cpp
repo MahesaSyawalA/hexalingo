@@ -7,12 +7,10 @@
 #include "json.hpp"
 using json = nlohmann::json;
 
-json db;
-
 // Tambahkan include fitur.cpp untuk akses adminMenu() dan userMenu()
 #include "fitur.cpp"
 #include "fitur-jakoy.cpp"
-#include "kontrak.cpp"
+#include "feature3.cpp"
 
 using namespace std;
 
@@ -142,7 +140,7 @@ int main()
                 cout << "Selamat data di Aplikasi Hexalingo\n";
                 cout << "1. Profil \n";
                 cout << "2. Matakuliah & Materi Pembelajaran \n";
-                cout << "3. Kontrak Matakuliah & Materi Pembelajaran \n";
+                cout << "3. Feature3 \n";
                 cout << "4. Hapus Kontrak Matakuliah & Materi Pembelajaran \n";
                 cout << "5. Lihat Histori\n";
                 cout << "6. Logout\n";
@@ -166,7 +164,7 @@ int main()
                         break;
                     case 3:
                         tambahHistori("Melihat Kontrak Mata Kulisah Dan Materi Pembelajaran");
-                        kontrakmapel(db["daftar_mata_pelajaran"], db["session"]["user_id"]);
+                        mainTugas();
                         break;
                     case 4:
                         tambahHistori("Melihat Hapus Kontrak Mata Kulisah Dan Materi Pembelajaran");
