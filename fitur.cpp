@@ -220,7 +220,7 @@ void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string
 
     if (!materi.isi.empty()) {
         string isiIndent = prefix + indentUnit; 
-        cout << isiIndent << "[Isi] " << materi.isi << endl;
+        cout << isiIndent << " [Isi] " << materi.isi << endl;
     }
     for (size_t i = 0; i < materi.subMateri.size(); ++i) {
         string newPrefix = prefix + indentUnit;
