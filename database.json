@@ -37,6 +37,39 @@
                     ]
                 }
             ]
+        },
+        {
+            "id": "5",
+            "judul": "PPKN",
+            "submateri": [
+                {
+                    "id": "5.1",
+                    "judul": "psikologis",
+                    "submateri": [
+                        {
+                            "id": "5.1.1",
+                            "judul": "hhsha"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "6",
+            "judul": "WEC",
+            "submateri": [
+                {
+                    "id": "6.1",
+                    "judul": "lemans",
+                    "submateri": [
+                        {
+                            "id": "6.1.1",
+                            "isi": "stragiggggssgsgss",
+                            "judul": "mulsane"
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "jawaban": [

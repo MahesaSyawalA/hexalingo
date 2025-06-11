@@ -13,6 +13,7 @@ struct Materi {
     string id;
     string judul;
     vector<Materi> subMateri;
+    string isi;
 };
 
 vector<Materi> rootMateriList;
@@ -43,6 +44,9 @@ json materiToJson(const Materi& materi) {
     j["id"] = materi.id;
     j["judul"] = materi.judul;
 
+    if (!materi.isi.empty()) {
+        j["isi"] = materi.isi;
+    }
     if (materi.subMateri.size() > 0) {
         j["submateri"] = json::array();
         for (const auto& sub : materi.subMateri) {
@@ -57,6 +61,7 @@ Materi jsonToMateri(const json& j) {
     Materi m;
     m.id = j.value("id", "");
     m.judul = j.value("judul", "");
+    m.isi = j.value("isi", "");
 
     if (j.contains("submateri")) {
         for (const auto& sub : j["submateri"]) {
@@ -126,13 +131,29 @@ string generateNewId(const string& parentId, int urutan) {
 
 // ---------- Tambah Materi ----------
 void tambahMateri(Materi& materi, const string& parentId, int urutan) {
+
     materi.id = generateNewId(parentId, urutan);
     cout << "Masukkan Judul Materi (ID: " << materi.id << "): ";
     getline(cin, materi.judul);
     materi.judul = toLower(materi.judul);
 
+    int depth = count(materi.id.begin(), materi.id.end(), '.');
+
+    if (depth == 2) {
+    cout << "Masukkan isi materi untuk \"" << materi.judul << "\": ";
+    getline(cin, materi.isi);
+    materi.isi = toLower(materi.isi);
+    if (materi.isi.empty()) {
+        cout << "Isi materi tidak boleh kosong. Materi tidak ditambahkan.\n";
+        return;
+    }
+    cout << "Materi \"" << materi.judul << "\" berhasil ditambahkan.\n";
+    return;
+}
+
+    
     int subUrutan = 1;
-    while (inputYaTidak("Tambah sub-materi \"" + materi.judul + "\"?") == 'y') {
+    while (inputYaTidak("Tambah sub-materi \"" + materi.judul + "\"?") == 'y' and depth < 2) {
         Materi sub;
         tambahMateri(sub, materi.id, subUrutan++);
         materi.subMateri.push_back(sub);
@@ -197,6 +218,10 @@ void tampilkanMateriFormatBaru(const Materi& materi, int level = 0, const string
     else
         cout << prefix << batangVertikal << batangSubCabang << " [Submateri] " << materi.judul << endl;
 
+    if (!materi.isi.empty()) {
+        string isiIndent = prefix + indentUnit; 
+        cout << isiIndent << "[Isi] " << materi.isi << endl;
+    }
     for (size_t i = 0; i < materi.subMateri.size(); ++i) {
         string newPrefix = prefix + indentUnit;
         tampilkanMateriFormatBaru(materi.subMateri[i], level + 1, newPrefix);
@@ -235,9 +260,6 @@ void searchMateri(const json& data, const string& keyword) {
 
     if (!ditemukan) {
         cout << "Materi dengan judul \"" << keyword << "\" tidak ditemukan.\n";
-        cout << "Tekan Enter...";
-        string dummy;
-        getline(cin, dummy);
     }
     cout << "Tekan Enter...";
     string dummy;
