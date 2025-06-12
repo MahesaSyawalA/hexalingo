@@ -14,7 +14,7 @@ using namespace std;
 json db;
 
 
-const int MAX_QUEUE = 100; // atau sesuaikan batas maksimal
+const int MAX_QUEUE = 3; 
 int queue[MAX_QUEUE];
 int frontQueue = 0;
 int rearQueue = -1;
