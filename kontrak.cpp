@@ -8,30 +8,30 @@
 using json = nlohmann::json;
 using namespace std;
 
-json db;
+json dbK;
 
-bool loadDatabase(const string &filename) {
+bool loadDatabaseK(const string &filename) {
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Gagal membuka file database.\n";
         return false;
     }
-    file >> db;
+    file >> dbK;
     return true;
 }
 
-bool saveDatabase(const string &filename) {
+bool saveDatabaseK(const string &filename) {
     ofstream file(filename);
     if (!file.is_open()) {
         cerr << "Gagal menyimpan file database.\n";
         return false;
     }
-    file << setw(4) << db;
+    file << setw(4) << dbK;
     return true;
 }
 
-vector<int> getMataPelajaranUser(int user_id) {
-    for (const auto &user : db["users"]) {
+vector<int> getMataPelajaranUserK(int user_id) {
+    for (const auto &user : dbK["users"]) {
         if (user["id"] == user_id) {
             return user["mata_pelajaran"].get<vector<int>>();
         }
@@ -39,20 +39,20 @@ vector<int> getMataPelajaranUser(int user_id) {
     return {};
 }
 
-void tampilkanDaftarMateri(const json &materiList, int indent = 0) //untuk admin
+void tampilkanDaftarMateriK(const json &materiList, int indent = 0) //untuk admin
 {
     string spasi(indent * 2, ' ');
     for (const auto &materi : materiList) {
         if (!materi.contains("id") || !materi.contains("judul")) continue;
         cout << spasi << "[" << materi["id"] << "] " << materi["judul"] << "\n";
         if (materi.contains("submateri")) {
-            tampilkanDaftarMateri(materi["submateri"], indent + 1);
+            tampilkanDaftarMateriK(materi["submateri"], indent + 1);
         }
     }
 }
 
 void kontrakmapel(const json &materiList, int user_id) {
-    vector<int> mataUser  = getMataPelajaranUser (user_id);
+    vector<int> mataUser  = getMataPelajaranUserK(user_id);
 
     cout << "\nMata Pelajaran yang Sudah Anda Miliki:\n";
     if (mataUser .empty()) {
@@ -78,7 +78,7 @@ void kontrakmapel(const json &materiList, int user_id) {
     }
 
     cout << "\nDaftar Mata Pelajaran:\n";
-    tampilkanDaftarMateri(materiList);
+    tampilkanDaftarMateriK(materiList);
 
     string idDipilih;
     cout << "\nMasukkan ID mapel yang ingin Anda kontrak: ";
@@ -111,7 +111,7 @@ void kontrakmapel(const json &materiList, int user_id) {
         }
 
         // Update database
-        for (auto &user : db["users"]) {
+        for (auto &user : dbK["users"]) {
             if (user["id"] == user_id) {
                 user["mata_pelajaran"] = mataUser ; // Update daftar mata pelajaran
                 break;
@@ -119,14 +119,14 @@ void kontrakmapel(const json &materiList, int user_id) {
         }
 
         // Simpan perubahan ke database
-        saveDatabase("database.json");
+        saveDatabaseK("database.json");
     } else {
         cout << "ID tidak ditemukan dalam daftar materi.\n";
     }
 }
 
 void hapusKontrakMapel(const json &materiList, int user_id) {
-    vector<int> mataUser = getMataPelajaranUser(user_id);
+    vector<int> mataUser = getMataPelajaranUserK(user_id);
 
     if (mataUser.empty()) {
         cout << "\nAnda tidak memiliki mata pelajaran yang dikontrak.\n";
@@ -167,7 +167,7 @@ void hapusKontrakMapel(const json &materiList, int user_id) {
     mataUser.erase(mataUser.begin() + (pilihan - 1));
 
     // Perbarui database
-    for (auto &user : db["users"]) {
+    for (auto &user : dbK["users"]) {
         if (user["id"] == user_id) {
             user["mata_pelajaran"] = mataUser;
             break;
@@ -175,18 +175,18 @@ void hapusKontrakMapel(const json &materiList, int user_id) {
     }
 
     // Simpan perubahan ke database
-    if (saveDatabase("database.json")) {
+    if (saveDatabaseK("database.json")) {
         cout << "Mata pelajaran dengan ID " << idTerhapus << " berhasil dihapus dari kontrak Anda.\n";
     } else {
         cout << "Gagal menyimpan perubahan.\n";
     }
 }
 
-int main() {
+int mainKontrak() {
     const string filename = "database.json";
-    if (!loadDatabase(filename)) return 1;
+    if (!loadDatabaseK(filename)) return 1;
 
-    string role = db["session"]["role"];
+    string role = dbK["session"]["role"];
     int pilihan;
 
     do {
@@ -201,9 +201,9 @@ int main() {
         cin >> pilihan;
 
             switch (pilihan) {
-                case 1: tampilkanDaftarMateri(db["daftar_mata_pelajaran"]); break;
-                case 2: kontrakmapel(db["daftar_mata_pelajaran"], db["session"]["user_id"]);break;
-                case 3: hapusKontrakMapel(db["daftar_mata_pelajaran"], db["session"]["user_id"]);break; 
+                case 1: tampilkanDaftarMateriK(dbK["daftar_mata_pelajaran"]); break;
+                case 2: kontrakmapel(dbK["daftar_mata_pelajaran"], dbK["session"]["user_id"]);break;
+                case 3: hapusKontrakMapel(dbK["daftar_mata_pelajaran"], dbK["session"]["user_id"]);break; 
                 case 4: cout << "Keluar...\n"; break;
                 default: cout << "Pilihan tidak valid.\n";
             }

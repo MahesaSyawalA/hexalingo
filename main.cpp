@@ -9,8 +9,9 @@ using json = nlohmann::json;
 
 // Tambahkan include fitur.cpp untuk akses adminMenu() dan userMenu()
 #include "fitur.cpp"
-#include "fitur-jakoy.cpp"
 #include "feature3.cpp"
+#include "fitur-jakoy.cpp"
+#include "kontrak.cpp"
 
 using namespace std;
 
@@ -65,6 +66,12 @@ void showMainMenu()
 
 void showWelcomeMessage(User* user)
 {
+    // #ifdef _WIN32
+    // system("cls");
+    // #else
+    // system("clear");
+    // #endif
+
     cout << "\n========================================\n";
     cout << "          Selamat Datang!\n";
     cout << "========================================\n";
@@ -78,6 +85,12 @@ void showWelcomeMessage(User* user)
 
 int main()
 {
+    #ifdef _WIN32
+    system("cls");
+    #else
+    system("clear");
+    #endif
+
     Auth auth;
     int choice;
 
@@ -105,8 +118,9 @@ int main()
                 cout << "Selamat data di Aplikasi Hexalingo\n";
                 cout << "1. Profil \n";
                 cout << "2. Matakuliah & Materi Pembelajaran \n";
-                cout << "3. Logout\n";
-                cout << "4. Exit (session tetap aktif)\n";
+                cout << "3. Tugas Menu\n";
+                cout << "4. Logout\n";
+                cout << "5. Exit (session tetap aktif)\n";
                 cout << "========================================\n";
                 cout << "Pilihan: ";
 
@@ -123,10 +137,13 @@ int main()
                         adminMenu();
                         break;
                     case 3:
-                        auth.logout();
-                        return 0;
+                        mainTugas();
+                        break; 
                     case 4:
-                        return 0;
+                        auth.logout();
+                        return 0; // Exit the program
+                    case 4:
+                        return 0; // Exit the program
                     default:
                         cout << "Pilihan tidak valid. Logout otomatis...\n";
                         auth.logout();
@@ -140,11 +157,8 @@ int main()
                 cout << "Selamat data di Aplikasi Hexalingo\n";
                 cout << "1. Profil \n";
                 cout << "2. Matakuliah & Materi Pembelajaran \n";
-                cout << "3. Feature3 \n";
-                cout << "4. Hapus Kontrak Matakuliah & Materi Pembelajaran \n";
-                cout << "5. Lihat Histori\n";
-                cout << "6. Logout\n";
-                cout << "7. Exit (session tetap aktif)\n";
+                cout << "3. Logout\n";
+                cout << "4. Exit (session tetap aktif)\n";
                 cout << "========================================\n";
                 cout << "Pilihan: ";
 
@@ -163,22 +177,10 @@ int main()
                         userMenu();
                         break;
                     case 3:
-                        tambahHistori("Melihat Kontrak Mata Kulisah Dan Materi Pembelajaran");
-                        mainTugas();
-                        break;
-                    case 4:
-                        tambahHistori("Melihat Hapus Kontrak Mata Kulisah Dan Materi Pembelajaran");
-                        hapusKontrakMapel(db["daftar_mata_pelajaran"], db["session"]["user_id"]);
-                        break;
-                    case 5:
-                        tambahHistori("Melihat Histori Aktivitas");
-                        lihatHistori();
-                        break;
-                    case 6:
                         auth.logout();
-                        return 0;
-                    case 7:
-                        return 0;
+                        return 0; // Exit the program
+                    case 4:
+                        return 0; // Exit the program
                     default:
                         cout << "Pilihan tidak valid. Logout otomatis...\n";
                         auth.logout();
