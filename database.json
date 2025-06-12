@@ -123,13 +123,44 @@
             ],
             "nilai": 100.0,
             "user_id": 3
+        },
+        {
+            "id_tugas": 1,
+            "jawaban": [
+                "A"
+            ],
+            "nilai": 0.0,
+            "user_id": 3
+        },
+        {
+            "id_tugas": 4,
+            "jawaban": [
+                "A"
+            ],
+            "nilai": 100.0,
+            "user_id": 1
+        },
+        {
+            "id_tugas": 1,
+            "jawaban": [
+                "A"
+            ],
+            "nilai": 0.0,
+            "user_id": 1
+        },
+        {
+            "id_tugas": 2,
+            "jawaban": [
+                "A"
+            ],
+            "nilai": 100.0,
+            "user_id": 1
         }
     ],
     "session": {
-        "nama": "admin12",
-        "role": "user",
-        "user_id": 3,
-        "username": "3"
+        "user_id": null,
+        "nama": null,
+        "role": null
     },
     "tugas": [
         {
@@ -286,6 +317,16 @@
             "phone": "",
             "role": "user",
             "username": "jujuju"
+        },
+        {
+            "email": "jnfs@gmail.com",
+            "id": 6,
+            "mata_pelajaran": [],
+            "name": "kaobs",
+            "password": "12345678!@#$%^&*(",
+            "phone": "09273829022",
+            "role": "admin",
+            "username": "koy"
         }
     ]
 }
