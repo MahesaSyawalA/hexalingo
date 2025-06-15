@@ -11,6 +11,7 @@ using json = nlohmann::json;
 #include "feature3.cpp"
 #include "fitur-jakoy.cpp"
 #include "kontrak.cpp"
+#include "leaderboard.cpp"
 
 using namespace std;
 
@@ -127,8 +128,9 @@ int main()
                 cout << "2. Matakuliah & Materi Pembelajaran \n";
                 cout << "3. Kontrak Mata Kuliah\n";
                 cout << "4. Tugas Menu\n";
-                cout << "5. Logout\n";
-                cout << "6. Exit (session tetap aktif)\n";
+                cout << "5. Leaderboard\n";
+                cout << "6. Logout\n";
+                cout << "7. Exit (session tetap aktif)\n";
                 cout << "========================================\n";
                 cout << "Pilihan: ";
 
@@ -151,9 +153,12 @@ int main()
                         mainTugas();
                         break; // Exit the program
                     case 5:
+                        Leaderboard();
+                        break; // Exit the program
+                    case 6:
                         auth.logout();
                         return 0;
-                    case 6:
+                    case 7:
                         return 0; // Exit the program
                     default:
                         cout << "Pilihan tidak valid. Logout otomatis...\n";
