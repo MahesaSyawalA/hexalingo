@@ -155,12 +155,22 @@
             ],
             "nilai": 100.0,
             "user_id": 1
+        },
+        {
+            "id_tugas": 5,
+            "jawaban": [
+                "mahesa",
+                "C"
+            ],
+            "nilai": 50.0,
+            "user_id": 1
         }
     ],
     "session": {
-        "user_id": null,
-        "nama": null,
-        "role": null
+        "nama": "Mahesa Syawal",
+        "role": "user",
+        "user_id": 1,
+        "username": "mahesa"
     },
     "tugas": [
         {
@@ -247,6 +257,29 @@
                     "pertanyaan": "apa kah kamu single "
                 }
             ]
+        },
+        {
+            "deadline": "2025-12-31 12:00",
+            "id_materi": "8",
+            "parent_id": "8",
+            "soal": [
+                {
+                    "jenis": "essay",
+                    "kunci": "mahesa",
+                    "pertanyaan": "mahesa"
+                },
+                {
+                    "jenis": "pilihan",
+                    "kunci": "D",
+                    "opsi": [
+                        "as",
+                        "d",
+                        "g",
+                        "c"
+                    ],
+                    "pertanyaan": "mahesa"
+                }
+            ]
         }
     ],
     "users": [
@@ -258,7 +291,8 @@
                 2,
                 3,
                 4,
-                5
+                5,
+                8
             ],
             "name": "Mahesa Syawal",
             "password": "mahesa",
