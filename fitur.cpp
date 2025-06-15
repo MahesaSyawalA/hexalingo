@@ -153,7 +153,7 @@ void tambahMateri(Materi& materi, const string& parentId, int urutan) {
 
     
     int subUrutan = 1;
-    while (inputYaTidak("Tambah sub-materi \"" + materi.judul + "\"?") == 'y' and depth < 2) {
+    while (inputYaTidak("Tambah sub-materi \"" + materi.judul + "\"?") == 'y' && depth < 2) {
         Materi sub;
         tambahMateri(sub, materi.id, subUrutan++);
         materi.subMateri.push_back(sub);
