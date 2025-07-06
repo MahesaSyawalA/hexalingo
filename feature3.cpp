@@ -733,7 +733,7 @@ int mainTugas() {
                 case 3: kerjakanTugas();                                         break;
                 case 4: antriTugas();  prosesAntrianTugas();                     break;
                 case 5: mainDetailTugasSelesai();                                break;
-                case 6: std::cout << "Keluar...\n";                              break;
+                case 6: std::cout << "Keluar...\n"; return 0;                    break;
                 default: std::cout << "Pilihan tidak valid.\n";
             }
         }
